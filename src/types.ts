@@ -6,10 +6,10 @@ export { HassEntity } from 'home-assistant-js-websocket';
 export type TemplateNothing = typeof nothing;
 export type Template = TemplateResult | TemplateNothing;
 
-export class StringEvent extends CustomEvent<string> { }
-export class StringArrayEvent extends CustomEvent<string[]> { }
-export class NumberEvent extends CustomEvent<number> { }
-export class NumberArrayEvent extends CustomEvent<number[]> { }
+export class StringEvent extends CustomEvent<string> {}
+export class StringArrayEvent extends CustomEvent<string[]> {}
+export class NumberEvent extends CustomEvent<number> {}
+export class NumberArrayEvent extends CustomEvent<number[]> {}
 
 export interface Theme {
   "primary-color": string;
