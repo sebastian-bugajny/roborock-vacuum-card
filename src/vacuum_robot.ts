@@ -30,7 +30,7 @@ export class VacuumRobot {
     switch (cleaningMode) {
       case RoborockCleaningMode.VacAndMop:
       case RoborockCleaningMode.Mop:
-        return [RoborockMopMode.Mild, RoborockMopMode.Moderate, RoborockMopMode.Intense].includes(mode);
+        return [RoborockMopMode.Low, RoborockMopMode.Medium, RoborockMopMode.High].includes(mode);
       case RoborockCleaningMode.Vac:
         return mode == RoborockMopMode.Off;
     }
@@ -47,7 +47,7 @@ export class VacuumRobot {
   }
 
   constructor() {
-    
+
   }
 
   public setHass(hass: MyHomeAssistant) {
