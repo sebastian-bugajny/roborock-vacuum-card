@@ -6,10 +6,10 @@ export { HassEntity } from 'home-assistant-js-websocket';
 export type TemplateNothing = typeof nothing;
 export type Template = TemplateResult | TemplateNothing;
 
-export class StringEvent extends CustomEvent<string> {}
-export class StringArrayEvent extends CustomEvent<string[]> {}
-export class NumberEvent extends CustomEvent<number> {}
-export class NumberArrayEvent extends CustomEvent<number[]> {}
+export class StringEvent extends CustomEvent<string> { }
+export class StringArrayEvent extends CustomEvent<string[]> { }
+export class NumberEvent extends CustomEvent<number> { }
+export class NumberArrayEvent extends CustomEvent<number[]> { }
 
 export interface Theme {
   "primary-color": string;
@@ -20,7 +20,7 @@ export interface Themes {
   default_theme: string;
   darkMode: boolean;
   themes: {
-      [key: string]: Theme;
+    [key: string]: Theme;
   };
 }
 export interface Area {
@@ -48,9 +48,9 @@ export enum RoborockSuctionMode {
 }
 export enum RoborockMopMode {
   Off = 'off',
-  Mild = 'mild',
-  Moderate = 'moderate',
-  Intense = 'intense',
+  Low = 'low',
+  Medium = 'medium',
+  High = 'high',
 }
 export enum RoborockRouteMode {
   Fast = 'fast',

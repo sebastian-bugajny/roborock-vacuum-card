@@ -8,7 +8,7 @@ Home Assistant vacuum card that uses core Roborock integration and supports mult
 
 ## Caveat
 
-This card is not highly configurable and was created for personal use. It expects (and was tested with) the Roborock S8 Pro Ultra vacuum robot and dock.
+This card is not highly configurable and was created for personal use. It expects (and was tested with) the Roborock Saros 10R vacuum robot and dock.
 
 ## Card configuration
 

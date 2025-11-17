@@ -40,7 +40,7 @@ export class CustomCleaningPopup extends LitElement {
   @state()
   private activeSuctionMode: RoborockSuctionMode = RoborockSuctionMode.Turbo;
   @state()
-  private activeMopMode: RoborockMopMode = RoborockMopMode.Moderate;
+  private activeMopMode: RoborockMopMode = RoborockMopMode.High;
   @state()
   private activeRouteMode: RoborockRouteMode = RoborockRouteMode.Standard;
   @state()
@@ -58,7 +58,7 @@ export class CustomCleaningPopup extends LitElement {
 
   connectedCallback() {
     super.connectedCallback();
-    
+
     this.cleaningModes = [{
       text: localize('mode.vac&mop'),
       value: RoborockCleaningMode.VacAndMop
@@ -73,7 +73,7 @@ export class CustomCleaningPopup extends LitElement {
     this.activeSuctionMode = this.robot.getSuctionMode();
     this.activeMopMode = this.robot.getMopMode();
     this.activeRouteMode = this.robot.getRouteMode();
-    
+
     if (this.activeSuctionMode == RoborockSuctionMode.Off)
       this.activeCleaningMode = RoborockCleaningMode.Mop;
     else if (this.activeMopMode == RoborockMopMode.Off)
@@ -263,7 +263,7 @@ export class CustomCleaningPopup extends LitElement {
     if (!VacuumRobot.isSupportedSuctionMode(this.activeSuctionMode, this.activeCleaningMode))
       this.activeSuctionMode = this.activeCleaningMode == RoborockCleaningMode.Mop ? RoborockSuctionMode.Off : RoborockSuctionMode.Turbo;
     if (!VacuumRobot.isSupportedMopMode(this.activeMopMode, this.activeCleaningMode))
-      this.activeMopMode = this.activeCleaningMode == RoborockCleaningMode.Vac ? RoborockMopMode.Off : RoborockMopMode.Moderate;
+      this.activeMopMode = this.activeCleaningMode == RoborockCleaningMode.Vac ? RoborockMopMode.Off : RoborockMopMode.Medium;
     if (!VacuumRobot.isSupportedRouteMode(this.activeRouteMode, this.activeCleaningMode))
       this.activeRouteMode = RoborockRouteMode.Standard;
   }
