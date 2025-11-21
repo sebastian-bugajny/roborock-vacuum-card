@@ -12,5 +12,9 @@
 
     .text {
         margin-left: 8px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        flex: 1;
     }
 }

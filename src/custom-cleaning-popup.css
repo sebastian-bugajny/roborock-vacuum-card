@@ -16,6 +16,36 @@
   display: block;
   width: 100%;
   margin-top: 8px;
+
+  .popup-card {
+    background-color: transparent;
+    border-radius: 0;
+
+    .content {
+      flex-direction: column;
+      padding: 0 8px 8px 8px;
+    }
+
+    .parameters {
+      min-height: auto;
+      min-width: unset;
+      width: 100%;
+      padding: 4px 8px 8px 8px;
+    }
+
+    .areas {
+      width: 100%;
+      max-width: 100%;
+    }
+
+    .header {
+      padding: 8px 12px;
+    }
+
+    .actions {
+      padding: 0px 12px 12px 12px;
+    }
+  }
 }
 
 .popup-card {
@@ -85,6 +115,8 @@
   .areas {
     font-size: 20px;
     font-weight: 300;
+    flex: 1;
+    overflow: hidden;
   }
 
   .actions {
