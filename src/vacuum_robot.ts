@@ -10,6 +10,8 @@ import {
 export class VacuumRobot {
   private hass!: MyHomeAssistant;
   private entity_id!: string;
+  private mop_intensity_entity?: string;
+  private mop_mode_entity?: string;
 
   get name(): string {
     return this.entity_id.replace('vacuum.', '');
@@ -58,16 +60,26 @@ export class VacuumRobot {
     this.entity_id = entity_id;
   }
 
+  public setMopIntensityEntity(entity?: string) {
+    this.mop_intensity_entity = entity;
+  }
+
+  public setMopModeEntity(entity?: string) {
+    this.mop_mode_entity = entity;
+  }
+
   public getSuctionMode(): RoborockSuctionMode {
     return this.getAttributeValue(this.hass.states[this.entity_id], 'fan_speed');
   }
 
   public getMopMode(): RoborockMopMode {
-    return this.state(`select.${this.name}_mop_intensity`);
+    const entityId = this.mop_intensity_entity ?? `select.${this.name}_mop_intensity`;
+    return this.state(entityId);
   }
 
   public getRouteMode(): RoborockRouteMode {
-    return this.state(`select.${this.name}_mop_mode`);
+    const entityId = this.mop_mode_entity ?? `select.${this.name}_mop_mode`;
+    return this.state(entityId);
   }
 
   public callServiceAsync(service: string) {
@@ -95,15 +107,17 @@ export class VacuumRobot {
   }
 
   public setMopModeAsync(value: RoborockMopMode) {
+    const entityId = this.mop_intensity_entity ?? `select.${this.name}_mop_intensity`;
     return this.hass.callService('select', 'select_option', {
-      entity_id: `select.${this.name}_mop_intensity`,
+      entity_id: entityId,
       option: value,
     });
   }
 
   public setRouteModeAsync(value: RoborockRouteMode) {
+    const entityId = this.mop_mode_entity ?? `select.${this.name}_mop_mode`;
     return this.hass.callService('select', 'select_option', {
-      entity_id: `select.${this.name}_mop_mode`,
+      entity_id: entityId,
       option: value,
     });
   }

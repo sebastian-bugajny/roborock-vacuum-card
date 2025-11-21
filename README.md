@@ -15,6 +15,9 @@ This card is not highly configurable and was created for personal use. It expect
 ```yaml
 type: custom:roborock-vacuum-card
 entity: vacuum.robot
+# Optional: Custom entity names for mop settings (useful for non-English integrations)
+# mop_intensity_entity: select.robot_intensywnosc_mopa
+# mop_mode_entity: select.robot_tryb_mopa
 stats:
   default:
     - entity: sensor.robot_filter_time_left
