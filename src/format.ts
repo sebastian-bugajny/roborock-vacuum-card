@@ -9,3 +9,10 @@ export function formatTime(seconds: number): string {
   
     return hoursString + minutesString.trim();
   }
+
+export function formatTimeAsMinutesSeconds(seconds: number): string {
+    const minutes = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    
+    return `${minutes}:${secs.toString().padStart(2, '0')}`;
+  }

@@ -44,12 +44,10 @@ stats:
     - entity: sensor.robot_cleaning_progress
       title: Cleaning progress
       unit: '%'
-    - entity: sensor.robot_cleaning_area
-      title: Cleaning area
-      unit: m²
+    - entity: sensor.robot_current_root
+      title: Current room
     - entity: sensor.robot_cleaning_time
-      divide_by: 60
-      scale: 1
+      format: time_minutes_seconds
       title: Cleaning time
       unit: min
 areas:
@@ -70,3 +68,25 @@ areas:
   - area_id: hallway
     roborock_area_id: 19
 ```
+
+### Stats Configuration Options
+
+Each stat can have the following properties:
+
+- `entity` - Home Assistant entity ID
+- `attribute` - Entity attribute to display (optional)
+- `title` - Display title for the stat
+- `unit` - Unit to display after the value
+- `scale` - Number of decimal places (optional)
+- `divide_by` - Divide the value by this number (optional)
+- `format` - Special formatting option:
+  - `time_minutes_seconds` - Format time in MM:SS format (e.g., "21:35" for 21 minutes and 35 seconds)
+
+**Example:** To show cleaning time in MM:SS format:
+```yaml
+- entity: sensor.robot_cleaning_time
+  format: time_minutes_seconds
+  title: Cleaning time
+  unit: min
+```
+
