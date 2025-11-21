@@ -32,6 +32,8 @@ export class CustomCleaningPopup extends LitElement {
   public areas: RoborockArea[] = [];
   @property()
   public iconColor: string = '#000';
+  @property({ type: Boolean })
+  public inline: boolean = false;
 
   @state()
   private popupRequestInProgress: boolean = false;
@@ -138,6 +140,10 @@ export class CustomCleaningPopup extends LitElement {
   }
 
   private onPopupBackgroundClick(e: MouseEvent) {
+    // Don't close in inline mode
+    if (this.inline)
+      return;
+
     const target = e.target as Element;
     if (!target || !target.classList.contains('popup-background'))
       return;
@@ -157,11 +163,14 @@ export class CustomCleaningPopup extends LitElement {
     const areas = this.renderAreas();
     const progress = this.renderProgress();
 
+    const containerClass = this.inline ? 'inline-container' : 'popup-background';
+    const closeButton = this.inline ? nothing : html`<ha-icon-button icon="mdi:close" @click=${this.onPopupClose} ><ha-icon icon="mdi:close"></ha-icon></ha-icon-button>`;
+
     return html`
-      <div class="popup-background" @click=${this.onPopupBackgroundClick}>
+      <div class="${containerClass}" @click=${this.onPopupBackgroundClick}>
         <div class="popup-card">
           <div class="header">
-            <ha-icon-button icon="mdi:close" @click=${this.onPopupClose} ><ha-icon icon="mdi:close"></ha-icon></ha-icon-button>
+            ${closeButton}
             <div class="text">${localize(`common.custom_cleaning`)}</div>
           </div>
           <div class="content">

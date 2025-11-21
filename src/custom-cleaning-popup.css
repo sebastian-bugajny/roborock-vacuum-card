@@ -11,6 +11,13 @@
   z-index: 999;
 }
 
+.inline-container {
+  position: relative;
+  display: block;
+  width: 100%;
+  margin-top: 8px;
+}
+
 .popup-card {
   position: relative;
   color: var(--vc-primary-text-color);

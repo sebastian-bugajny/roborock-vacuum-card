@@ -18,6 +18,8 @@ entity: vacuum.robot
 # Optional: Custom entity names for mop settings (useful for non-English integrations)
 # mop_intensity_entity: select.robot_intensywnosc_mopa
 # mop_mode_entity: select.robot_tryb_mopa
+# Optional: Show custom cleaning panel inline instead of as a popup (default: false)
+# show_custom_cleaning_inline: true
 stats:
   default:
     - entity: sensor.robot_filter_time_left
@@ -67,6 +69,23 @@ areas:
     roborock_area_id: 18
   - area_id: hallway
     roborock_area_id: 19
+```
+
+### Configuration Options
+
+#### `show_custom_cleaning_inline`
+- **Type:** `boolean`
+- **Default:** `false`
+- **Description:** When set to `true`, the custom cleaning panel is always visible below the main card instead of appearing as a popup. This provides quick access to room selection and cleaning modes without needing to click to open a popup.
+
+**Example:**
+```yaml
+type: custom:roborock-vacuum-card
+entity: vacuum.saros_10r
+show_custom_cleaning_inline: true
+areas:
+  - area_id: salon
+    roborock_area_id: 1
 ```
 
 ### Stats Configuration Options
