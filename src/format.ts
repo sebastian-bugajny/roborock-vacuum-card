@@ -16,3 +16,10 @@ export function formatTimeAsMinutesSeconds(seconds: number): string {
     
     return `${minutes}:${secs.toString().padStart(2, '0')}`;
   }
+
+export function formatMinutesAsMinutesSeconds(totalMinutes: number): string {
+    const minutes = Math.floor(totalMinutes);
+    const seconds = Math.floor((totalMinutes - minutes) * 60);
+    
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  }

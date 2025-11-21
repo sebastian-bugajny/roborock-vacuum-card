@@ -47,7 +47,7 @@ stats:
     - entity: sensor.robot_current_root
       title: Current room
     - entity: sensor.robot_cleaning_time
-      format: time_minutes_seconds
+      format: minutes_to_minutes_seconds
       title: Cleaning time
       unit: min
 areas:
@@ -80,12 +80,13 @@ Each stat can have the following properties:
 - `scale` - Number of decimal places (optional)
 - `divide_by` - Divide the value by this number (optional)
 - `format` - Special formatting option:
-  - `time_minutes_seconds` - Format time in MM:SS format (e.g., "21:35" for 21 minutes and 35 seconds)
+  - `time_minutes_seconds` - Format seconds as MM:SS (e.g., "21:35" for 1295 seconds)
+  - `minutes_to_minutes_seconds` - Format minutes as MM:SS (e.g., "32:45" for 32.75 minutes)
 
-**Example:** To show cleaning time in MM:SS format:
+**Example:** To show cleaning time in MM:SS format when sensor reports minutes:
 ```yaml
 - entity: sensor.robot_cleaning_time
-  format: time_minutes_seconds
+  format: minutes_to_minutes_seconds
   title: Cleaning time
   unit: min
 ```

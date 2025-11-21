@@ -17,7 +17,7 @@ import {
   RoborockSuctionMode,
   RoborockMopMode,
 } from './types'
-import { formatTime, formatTimeAsMinutesSeconds } from './format'
+import { formatTime, formatTimeAsMinutesSeconds, formatMinutesAsMinutesSeconds } from './format'
 import { getSuctionIcon, getMoppingIcon as getMopIcon, getRouteIcon } from './resorces'
 import { CustomCleaningPopup } from './custom-cleaning-popup'
 
@@ -232,6 +232,9 @@ export class RoborockVacuumCard extends LitElement {
           if (format === 'time_minutes_seconds') {
             const seconds = parseFloat(state);
             state = formatTimeAsMinutesSeconds(seconds);
+          } else if (format === 'minutes_to_minutes_seconds') {
+            const minutes = parseFloat(state);
+            state = formatMinutesAsMinutesSeconds(minutes);
           } else {
             const needProcessing = scale != null || divide_by != null;
             if (needProcessing) {
