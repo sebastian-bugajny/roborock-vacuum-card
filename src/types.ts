@@ -84,6 +84,7 @@ export interface VacuumCardStat {
   divide_by?: number
   unit?: string;
   title?: string;
+  format?: 'time_minutes_seconds';
 }
 
 export interface VacuumArea {

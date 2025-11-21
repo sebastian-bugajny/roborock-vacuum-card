@@ -17,7 +17,7 @@ import {
   RoborockSuctionMode,
   RoborockMopMode,
 } from './types'
-import { formatTime } from './format'
+import { formatTime, formatTimeAsMinutesSeconds } from './format'
 import { getSuctionIcon, getMoppingIcon as getMopIcon, getRouteIcon } from './resorces'
 import { CustomCleaningPopup } from './custom-cleaning-popup'
 
@@ -209,7 +209,7 @@ export class RoborockVacuumCard extends LitElement {
     const statsList = this.config.stats[state] || this.config.stats.default || [];
 
     const stats = statsList.map(
-      ({ entity, attribute, scale, divide_by, unit, title }) => {
+      ({ entity, attribute, scale, divide_by, unit, title, format }) => {
         if (!entity && !attribute)
           return nothing;
 
@@ -228,17 +228,23 @@ export class RoborockVacuumCard extends LitElement {
         if (state === undefined) {
           state = 'N/A';
         } else {
-          const needProcessing = scale != null || divide_by != null;
-          if (needProcessing) {
-            let value = parseFloat(state);
+          // Apply custom formatting if specified
+          if (format === 'time_minutes_seconds') {
+            const seconds = parseFloat(state);
+            state = formatTimeAsMinutesSeconds(seconds);
+          } else {
+            const needProcessing = scale != null || divide_by != null;
+            if (needProcessing) {
+              let value = parseFloat(state);
 
-            if (divide_by != null && divide_by > 0)
-              value = value / divide_by;
+              if (divide_by != null && divide_by > 0)
+                value = value / divide_by;
 
-            if (scale != null)
-              state = value.toFixed(scale);
-            else
-              state = value.toString();
+              if (scale != null)
+                state = value.toFixed(scale);
+              else
+                state = value.toString();
+            }
           }
         }
 
