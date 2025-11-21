@@ -69,6 +69,8 @@ export class RoborockVacuumCard extends LitElement {
   setConfig(config: RoborockVacuumCardConfig) {
     this.config = buildConfig(config);
     this.robot.setEntity(this.config.entity);
+    this.robot.setMopIntensityEntity(this.config.mop_intensity_entity);
+    this.robot.setMopModeEntity(this.config.mop_mode_entity);
   }
 
   getCardSize(): Number {

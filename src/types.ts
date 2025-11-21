@@ -103,6 +103,8 @@ export interface RoborockVacuumCardConfig {
   areas?: VacuumArea[];
   default_mode?: RoborockCleaningMode;
   default_modes?: Record<RoborockCleaningMode, RoborockCleaningParameters>;
+  mop_intensity_entity?: string;
+  mop_mode_entity?: string;
 }
 
 export interface RoborockSensorIds {
