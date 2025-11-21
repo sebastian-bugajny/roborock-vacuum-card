@@ -18,8 +18,8 @@
   margin-top: 8px;
 
   .popup-card {
-    background-color: transparent;
-    border-radius: 0;
+    background-color: var(--card-background-color);
+    border-radius: 16px;
 
     .content {
       flex-direction: column;
@@ -36,6 +36,14 @@
     .areas {
       width: 100%;
       max-width: 100%;
+
+      .areas-header {
+        font-size: 22px;
+        line-height: 28px;
+        font-weight: 400;
+        text-align: center;
+        padding: 16px 4px 12px 4px;
+      }
     }
 
     .header {

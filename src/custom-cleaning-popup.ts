@@ -261,8 +261,13 @@ export class CustomCleaningPopup extends LitElement {
         }
       });
 
+    const header = this.inline 
+      ? html`<div class="areas-header">${localize(`common.room_selection`)}</div>`
+      : nothing;
+
     return html`
       <div class="areas">
+        ${header}
         <multiselect-button-group buttons="${areas}" @select="${this.onAreasChange}"></multiselect-button-group>
       </div>
     `;
