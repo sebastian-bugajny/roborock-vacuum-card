@@ -125,7 +125,7 @@ export class RoborockVacuumCard extends LitElement {
           ${mopDrying}
           ${battery}
         </div>
-        <div class="content" @click=${this.onPopupShow}>
+        <div class="content" @click=${this.config.show_custom_cleaning_inline ? null : this.onPopupShow}>
           ${errors}
           <div class="state">
             ${combinedState}
@@ -152,13 +152,24 @@ export class RoborockVacuumCard extends LitElement {
   }
 
   private renderPopup(): Template {
-    if (!this.hass || !this.config || !this.config.areas || !this.popupActive)
+    if (!this.hass || !this.config || !this.config.areas)
+      return nothing;
+
+    // If inline mode is enabled, always show; otherwise only show when popup is active
+    if (!this.config.show_custom_cleaning_inline && !this.popupActive)
       return nothing;
 
     const areas = this.getAreas();
+    const inline = this.config.show_custom_cleaning_inline ?? false;
 
     return html`
-      <custom-cleaning-popup robot=${this.robot} areas=${areas} iconColor=${this.iconColor} @close=${this.onPopupClose}></custom-cleaning-popup>
+      <custom-cleaning-popup 
+        robot=${this.robot} 
+        areas=${areas} 
+        iconColor=${this.iconColor} 
+        .inline=${inline}
+        @close=${this.onPopupClose}>
+      </custom-cleaning-popup>
     `;
   }
 
@@ -337,7 +348,7 @@ export class RoborockVacuumCard extends LitElement {
     const result = icons.map(icon => html`<div class="tip">${icon}</div>`)
 
     return html`
-    <div class="modes" @click=${this.onPopupShow}>
+    <div class="modes" @click=${this.config.show_custom_cleaning_inline ? null : this.onPopupShow}>
       ${result}
     </div>
     `;

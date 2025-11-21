@@ -106,6 +106,7 @@ export interface RoborockVacuumCardConfig {
   default_modes?: Record<RoborockCleaningMode, RoborockCleaningParameters>;
   mop_intensity_entity?: string;
   mop_mode_entity?: string;
+  show_custom_cleaning_inline?: boolean;
 }
 
 export interface RoborockSensorIds {

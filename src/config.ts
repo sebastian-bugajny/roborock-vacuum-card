@@ -44,5 +44,6 @@ export default function buildConfig(
     default_modes: { ...config.default_modes, ...default_modes },
     mop_intensity_entity: config.mop_intensity_entity,
     mop_mode_entity: config.mop_mode_entity,
+    show_custom_cleaning_inline: config.show_custom_cleaning_inline ?? false,
   };
 }
