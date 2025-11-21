@@ -1,3 +1,8 @@
+:host {
+    --vc-background: var(--ha-card-background, var(--card-background-color, white));
+    --vc-primary-select-background: color-mix(in srgb, var(--primary-color) 15%, var(--vc-background));
+}
+
 .multiselect-button {
     display: flex;
     line-height: 24px;
