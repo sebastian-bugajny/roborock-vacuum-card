@@ -13,5 +13,5 @@
     width: 40px;
     border-radius: 8px;
     background-color: var(--vc-primary-select-background);
-    border: 2px solid var(--vc-primary-select-background);
+    border: 1px solid var(--vc-primary-select-background);
 }
