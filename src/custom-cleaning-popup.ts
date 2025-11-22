@@ -76,12 +76,8 @@ export class CustomCleaningPopup extends LitElement {
     this.activeMopMode = this.robot.getMopMode();
     this.activeRouteMode = this.robot.getRouteMode();
 
-    if (this.activeSuctionMode == RoborockSuctionMode.Off)
-      this.activeCleaningMode = RoborockCleaningMode.Mop;
-    else if (this.activeMopMode == RoborockMopMode.Off)
-      this.activeCleaningMode = RoborockCleaningMode.Vac;
-    else
-      this.activeCleaningMode = RoborockCleaningMode.VacAndMop;
+    // Always start with VacAndMop mode
+    this.activeCleaningMode = RoborockCleaningMode.VacAndMop;
     
     // Set defaults based on cleaning mode
     this.fixModesIfNeeded();
