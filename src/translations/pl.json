@@ -93,6 +93,7 @@
   "common": {
     "custom_cleaning": "Spersonalizowane czyszczenie",
     "room_selection": "Wybór pomieszczeń",
+    "cycle_mode": "Licznik czyszczenia",
     "doc_error": "Błąd stacji",
     "mop_mode": "Stan wody",
     "route_mode": "Trasa",
