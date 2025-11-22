@@ -82,6 +82,9 @@ export class CustomCleaningPopup extends LitElement {
       this.activeCleaningMode = RoborockCleaningMode.Vac;
     else
       this.activeCleaningMode = RoborockCleaningMode.VacAndMop;
+    
+    // Set defaults based on cleaning mode
+    this.fixModesIfNeeded();
   }
 
   private onCleaningModeChange(e: StringEvent) {
