@@ -281,8 +281,15 @@ export class CustomCleaningPopup extends LitElement {
       this.activeSuctionMode = this.activeCleaningMode == RoborockCleaningMode.Mop ? RoborockSuctionMode.Off : RoborockSuctionMode.Turbo;
     if (!VacuumRobot.isSupportedMopMode(this.activeMopMode, this.activeCleaningMode))
       this.activeMopMode = this.activeCleaningMode == RoborockCleaningMode.Vac ? RoborockMopMode.Off : RoborockMopMode.High;
-    if (!VacuumRobot.isSupportedRouteMode(this.activeRouteMode, this.activeCleaningMode))
-      this.activeRouteMode = this.activeCleaningMode == RoborockCleaningMode.Mop ? RoborockRouteMode.Deep : RoborockRouteMode.Standard;
+    
+    // Set route mode based on cleaning mode
+    if (this.activeCleaningMode == RoborockCleaningMode.Mop) {
+      // For Mop mode, always set Deep as default
+      this.activeRouteMode = RoborockRouteMode.Deep;
+    } else if (!VacuumRobot.isSupportedRouteMode(this.activeRouteMode, this.activeCleaningMode)) {
+      // For other modes, only change if current route is not supported
+      this.activeRouteMode = RoborockRouteMode.Standard;
+    }
   }
 
   private isSupportedSuctionMode(mode: RoborockSuctionMode, cleaningMode: RoborockCleaningMode): boolean {
