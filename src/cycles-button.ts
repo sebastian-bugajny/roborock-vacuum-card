@@ -35,7 +35,7 @@ export class CyclesButton extends LitElement {
         let cycles = parseInt(this.active, 10);
         cycles += 1;
 
-        if (cycles > 3)
+        if (cycles > 2)
             cycles = 1;
 
         this.active = cycles.toString();
