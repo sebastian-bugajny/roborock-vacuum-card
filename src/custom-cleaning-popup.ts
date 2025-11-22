@@ -1,7 +1,7 @@
 import { LitElement, CSSResultGroup, html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import styles from './custom-cleaning-popup.css';
-import { getSuctionIcon, getMoppingIcon, getRouteIcon } from './resorces'
+import { getSuctionIcon, getMoppingIcon, getRouteIcon, getCycleIcon } from './resorces'
 import localize from './localize';
 import { VacuumRobot } from './vacuum_robot'
 import {
@@ -159,6 +159,7 @@ export class CustomCleaningPopup extends LitElement {
     const suctionMode = this.renderSuctionMode();
     const moppingMode = this.renderMoppingMode();
     const routeMode = this.renderRouteMode();
+    const cycleMode = this.renderCycleMode();
     const areas = this.renderAreas();
     const progress = this.renderProgress();
 
@@ -178,7 +179,7 @@ export class CustomCleaningPopup extends LitElement {
               ${suctionMode}
               ${moppingMode}
               ${routeMode}
-              <cycles-button active=${this.activeCycleMode} color=${this.iconColor} @select=${this.onCycleModeChange}></cycles-button>
+              ${cycleMode}
             </div>
             ${areas}
           </div>
@@ -247,6 +248,21 @@ export class CustomCleaningPopup extends LitElement {
         <div class="value">${mode}</div>
       </div>
       <segment-button-group buttons=${this.routeModes} active=${this.activeRouteMode} @select=${this.onRouteModeChange}></segment-button-group>
+    `;
+  }
+
+  private renderCycleMode(): Template {
+    const cycleModes = [
+      { icon: getCycleIcon('1', 24, this.iconColor), value: '1' },
+      { icon: getCycleIcon('2', 24, this.iconColor), value: '2' }
+    ];
+
+    return html`
+      <div class="mode-title">
+        <div class="title">${localize('common.cycle_mode')}</div>
+        <div class="value">x${this.activeCycleMode}</div>
+      </div>
+      <segment-button-group buttons=${cycleModes} active=${this.activeCycleMode} @select=${this.onCycleModeChange}></segment-button-group>
     `;
   }
 

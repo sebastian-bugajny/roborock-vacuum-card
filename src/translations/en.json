@@ -93,6 +93,7 @@
   "common": {
     "custom_cleaning": "Custom cleaning",
     "room_selection": "Room selection",
+    "cycle_mode": "Cleaning cycles",
     "doc_error": "Doc error",
     "mop_mode": "Scrub Intensity & Water Flow",
     "route_mode": "Route",
