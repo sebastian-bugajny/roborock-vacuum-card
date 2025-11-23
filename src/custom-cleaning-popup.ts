@@ -32,6 +32,8 @@ export class CustomCleaningPopup extends LitElement {
   public areas: RoborockArea[] = [];
   @property()
   public iconColor: string = '#fff';
+  @property()
+  public primaryColor: string = '';
   @property({ type: Boolean })
   public inline: boolean = false;
 
@@ -165,9 +167,12 @@ export class CustomCleaningPopup extends LitElement {
 
     const containerClass = this.inline ? 'inline-container' : 'popup-background';
     const closeButton = this.inline ? nothing : html`<ha-icon-button icon="mdi:close" @click=${this.onPopupClose} ><ha-icon icon="mdi:close"></ha-icon></ha-icon-button>`;
+    
+    // Set CSS variable for primary color if provided
+    const styleAttr = this.primaryColor ? `--primary-color: ${this.primaryColor};` : '';
 
     return html`
-      <div class="${containerClass}" @click=${this.onPopupBackgroundClick}>
+      <div class="${containerClass}" style="${styleAttr}" @click=${this.onPopupBackgroundClick}>
         <div class="popup-card">
           <div class="header">
             ${closeButton}

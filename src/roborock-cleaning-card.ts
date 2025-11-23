@@ -65,10 +65,6 @@ export class RoborockCleaningCard extends LitElement {
     const primaryColor = getComputedStyle(document.documentElement)
       .getPropertyValue("--primary-color")
       .trim();
-    
-    const cardBackground = getComputedStyle(document.documentElement)
-      .getPropertyValue("--ha-card-background")
-      .trim();
 
     const areas = this.getAreas();
 
@@ -76,9 +72,9 @@ export class RoborockCleaningCard extends LitElement {
       <custom-cleaning-popup 
         robot=${this.robot} 
         .areas=${areas} 
-        iconColor=${this.iconColor} 
-        .inline=${true}
-        style="--primary-color: ${primaryColor}; --ha-card-background: ${cardBackground}">
+        iconColor=${this.iconColor}
+        primaryColor=${primaryColor}
+        .inline=${true}>
       </custom-cleaning-popup>
     `;
   }

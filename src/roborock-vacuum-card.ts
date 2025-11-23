@@ -163,12 +163,17 @@ export class RoborockVacuumCard extends LitElement {
 
     const areas = this.getAreas();
     const inline = this.config.show_custom_cleaning_inline ?? false;
+    
+    const primaryColor = getComputedStyle(document.documentElement)
+      .getPropertyValue("--primary-color")
+      .trim();
 
     return html`
       <custom-cleaning-popup 
         robot=${this.robot} 
         areas=${areas} 
-        iconColor=${this.iconColor} 
+        iconColor=${this.iconColor}
+        primaryColor=${primaryColor}
         .inline=${inline}
         @close=${this.onPopupClose}>
       </custom-cleaning-popup>
