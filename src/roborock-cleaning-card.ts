@@ -57,6 +57,19 @@ export class RoborockCleaningCard extends LitElement {
       return nothing;
     }
 
+    // Get colors from Home Assistant theme
+    this.iconColor = getComputedStyle(document.documentElement)
+      .getPropertyValue("--state-icon-color")
+      .trim() || '#fff';
+    
+    const primaryColor = getComputedStyle(document.documentElement)
+      .getPropertyValue("--primary-color")
+      .trim();
+    
+    const cardBackground = getComputedStyle(document.documentElement)
+      .getPropertyValue("--ha-card-background")
+      .trim();
+
     const areas = this.getAreas();
 
     return html`
@@ -64,7 +77,8 @@ export class RoborockCleaningCard extends LitElement {
         robot=${this.robot} 
         .areas=${areas} 
         iconColor=${this.iconColor} 
-        .inline=${true}>
+        .inline=${true}
+        style="--primary-color: ${primaryColor}; --ha-card-background: ${cardBackground}">
       </custom-cleaning-popup>
     `;
   }
