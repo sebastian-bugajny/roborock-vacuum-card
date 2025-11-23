@@ -9,6 +9,8 @@ export class SegmentButtonGroup extends LitElement {
     public buttons!: SvgButton<string>[];
     @property()
     public active!: string;
+    @property()
+    public primaryColor?: string;
 
     static get styles(): CSSResultGroup {
         return styles;
@@ -31,7 +33,17 @@ export class SegmentButtonGroup extends LitElement {
             `;
         });
 
+        // Add dynamic style if primaryColor is provided
+        const dynamicStyle = this.primaryColor ? html`
+          <style>
+            :host {
+              --primary-color: ${this.primaryColor};
+            }
+          </style>
+        ` : nothing;
+
         return html`
+          ${dynamicStyle}
           ${buttons}
         `;
     }

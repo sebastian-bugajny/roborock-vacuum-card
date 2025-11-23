@@ -7,6 +7,8 @@ import { Template, Button } from './types'
 export class MultiselectButtonGroup extends LitElement {
     @property()
     public buttons!: Button<string>[];
+    @property()
+    public primaryColor?: string;
     @state()
     public selection: Record<string, boolean> = {};
 
@@ -33,7 +35,17 @@ export class MultiselectButtonGroup extends LitElement {
             `;
         });
 
+        // Add dynamic style if primaryColor is provided
+        const dynamicStyle = this.primaryColor ? html`
+          <style>
+            :host {
+              --primary-color: ${this.primaryColor};
+            }
+          </style>
+        ` : nothing;
+
         return html`
+          ${dynamicStyle}
           ${buttons}
         `;
     }
