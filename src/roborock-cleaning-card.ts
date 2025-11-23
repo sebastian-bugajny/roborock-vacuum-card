@@ -28,6 +28,11 @@ export class RoborockCleaningCard extends LitElement {
     this.robot = new VacuumRobot();
   }
 
+  // Disable shadow DOM to inherit CSS variables from parent
+  protected createRenderRoot() {
+    return this;
+  }
+
   setConfig(config: RoborockCleaningCardConfig): void {
     if (!config.entity) {
       throw new Error(localize('error.missing_entity'));
@@ -52,21 +57,40 @@ export class RoborockCleaningCard extends LitElement {
       return nothing;
     }
 
-    const areas = this.config.areas?.map((a: VacuumArea) => ({
-      id: a.area_id,
-      name: localize(`area.${a.area_id}`),
-      icon: 'mdi:home',
-      roborock_area_id: a.roborock_area_id
-    })) || [];
+    const areas = this.getAreas();
 
     return html`
       <custom-cleaning-popup 
         robot=${this.robot} 
-        areas=${areas} 
+        .areas=${areas} 
         iconColor=${this.iconColor} 
         .inline=${true}>
       </custom-cleaning-popup>
     `;
+  }
+
+  private getAreas() {
+    const areas: any[] = [];
+
+    if (!this.config.areas)
+      return areas;
+
+    for (let { area_id, roborock_area_id } of this.config.areas) {
+      const normalizedAreaId = area_id.replace(/ /g, '_').toLowerCase();
+      const hassArea = (this.hass as any).areas?.[normalizedAreaId];
+      
+      if (!hassArea)
+        continue;
+
+      areas.push({
+        icon: hassArea.icon,
+        name: hassArea.name,
+        area_id: normalizedAreaId,
+        roborock_area_id,
+      });
+    }
+
+    return areas;
   }
 
   getCardSize(): number {
