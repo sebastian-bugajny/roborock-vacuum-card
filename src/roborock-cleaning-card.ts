@@ -58,13 +58,22 @@ export class RoborockCleaningCard extends LitElement {
     }
 
     // Get colors from Home Assistant theme
+    // Try multiple sources for primary color
+    let primaryColor = getComputedStyle(document.documentElement)
+      .getPropertyValue("--primary-color")
+      .trim();
+    
+    // If not found, try from body or use the theme's accent color
+    if (!primaryColor) {
+      primaryColor = getComputedStyle(document.body)
+        .getPropertyValue("--primary-color")
+        .trim();
+    }
+    
+    // Get icon color
     this.iconColor = getComputedStyle(document.documentElement)
       .getPropertyValue("--state-icon-color")
       .trim() || '#fff';
-    
-    const primaryColor = getComputedStyle(document.documentElement)
-      .getPropertyValue("--primary-color")
-      .trim();
 
     const areas = this.getAreas();
 
@@ -73,7 +82,7 @@ export class RoborockCleaningCard extends LitElement {
         robot=${this.robot} 
         .areas=${areas} 
         iconColor=${this.iconColor}
-        primaryColor=${primaryColor}
+        primaryColor=${primaryColor || undefined}
         .inline=${true}>
       </custom-cleaning-popup>
     `;

@@ -36,7 +36,7 @@ export class MultiselectButtonGroup extends LitElement {
         });
 
         // Add dynamic style if primaryColor is provided
-        const dynamicStyle = this.primaryColor ? html`
+        const dynamicStyle = this.primaryColor && this.primaryColor.trim() ? html`
           <style>
             :host {
               --primary-color: ${this.primaryColor};
