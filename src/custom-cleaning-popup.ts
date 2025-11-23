@@ -168,8 +168,16 @@ export class CustomCleaningPopup extends LitElement {
     const containerClass = this.inline ? 'inline-container' : 'popup-background';
     const closeButton = this.inline ? nothing : html`<ha-icon-button icon="mdi:close" @click=${this.onPopupClose} ><ha-icon icon="mdi:close"></ha-icon></ha-icon-button>`;
     
-    // Set CSS variable for primary color if provided
-    const styleAttr = this.primaryColor ? `--primary-color: ${this.primaryColor};` : '';
+    // Calculate the actual color that should be used for selection background
+    // This matches the calculation in segment-button-group.css: color-mix(in srgb, var(--primary-color) 40%, var(--vc-background))
+    let styleAttr = '';
+    if (this.primaryColor) {
+      // We need to pass both --primary-color and calculate --vc-primary-select-background
+      const cardBg = getComputedStyle(document.documentElement).getPropertyValue("--ha-card-background").trim() || 
+                     getComputedStyle(document.documentElement).getPropertyValue("--card-background-color").trim() || 
+                     'white';
+      styleAttr = `--primary-color: ${this.primaryColor}; --ha-card-background: ${cardBg}; --card-background-color: ${cardBg};`;
+    }
 
     return html`
       <div class="${containerClass}" style="${styleAttr}" @click=${this.onPopupBackgroundClick}>
