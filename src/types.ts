@@ -109,6 +109,15 @@ export interface RoborockVacuumCardConfig {
   show_custom_cleaning_inline?: boolean;
 }
 
+export interface RoborockCleaningCardConfig {
+  entity: string;
+  areas?: VacuumArea[];
+  default_mode?: RoborockCleaningMode;
+  default_modes?: Record<RoborockCleaningMode, RoborockCleaningParameters>;
+  mop_intensity_entity?: string;
+  mop_mode_entity?: string;
+}
+
 export interface RoborockSensorIds {
   cleaning: string;
   mopDrying: string;

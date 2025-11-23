@@ -20,8 +20,10 @@ import {
 import { formatTime, formatTimeAsMinutesSeconds, formatMinutesAsMinutesSeconds } from './format'
 import { getSuctionIcon, getMoppingIcon as getMopIcon, getRouteIcon } from './resorces'
 import { CustomCleaningPopup } from './custom-cleaning-popup'
+import { RoborockCleaningCard } from './roborock-cleaning-card'
 
 typeof (CustomCleaningPopup);
+typeof (RoborockCleaningCard);
 
 const PKG_VERSION = 'PKG_VERSION_VALUE';
 
