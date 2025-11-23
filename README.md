@@ -10,7 +10,19 @@ Home Assistant vacuum card that uses core Roborock integration and supports mult
 
 This card is not highly configurable and was created for personal use. It expects (and was tested with) the Roborock Saros 10R vacuum robot and dock.
 
+## Cards
+
+This integration provides two custom cards:
+
+### 1. Roborock Vacuum Card (`roborock-vacuum-card`)
+Main card showing vacuum status, stats, and optionally inline cleaning controls.
+
+### 2. Roborock Cleaning Card (`roborock-cleaning-card`)
+Standalone cleaning control panel that can be placed anywhere in your dashboard. Perfect for creating a separate cleaning control panel independent of the main vacuum card.
+
 ## Card configuration
+
+### Roborock Vacuum Card
 
 ```yaml
 type: custom:roborock-vacuum-card
@@ -109,4 +121,38 @@ Each stat can have the following properties:
   title: Cleaning time
   unit: min
 ```
+
+### Roborock Cleaning Card
+
+Standalone cleaning control card that can be placed anywhere in your dashboard.
+
+```yaml
+type: custom:roborock-cleaning-card
+entity: vacuum.saros_10r
+# Optional: Custom entity names for mop settings
+mop_intensity_entity: select.saros_10r_intensywnosc_mopa
+mop_mode_entity: select.saros_10r_tryb_mopa
+areas:
+  - area_id: salon
+    roborock_area_id: 1
+  - area_id: kuchnia
+    roborock_area_id: 4
+  - area_id: sypialnia
+    roborock_area_id: 2
+  - area_id: lazienka
+    roborock_area_id: 3
+```
+
+#### Configuration Options
+
+- `entity` - **Required** - Vacuum entity ID
+- `areas` - **Required** - List of rooms/areas to clean
+  - `area_id` - Area identifier for translation (e.g., `salon`, `kuchnia`)
+  - `roborock_area_id` - Roborock's internal area ID
+- `mop_intensity_entity` - Optional - Custom entity name for mop intensity control
+- `mop_mode_entity` - Optional - Custom entity name for mop mode control
+- `default_mode` - Optional - Default cleaning mode on open
+- `default_modes` - Optional - Default settings per cleaning mode
+
+This card displays the cleaning control panel as a standalone card that can be positioned independently of the main vacuum status card.
 
