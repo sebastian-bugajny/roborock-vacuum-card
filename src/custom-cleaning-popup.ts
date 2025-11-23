@@ -31,7 +31,7 @@ export class CustomCleaningPopup extends LitElement {
   @property()
   public areas: RoborockArea[] = [];
   @property()
-  public iconColor: string = '#000';
+  public iconColor: string = '#fff';
   @property({ type: Boolean })
   public inline: boolean = false;
 
