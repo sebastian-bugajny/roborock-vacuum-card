@@ -180,7 +180,7 @@ export class CustomCleaningPopup extends LitElement {
           </div>
           <div class="content">
             <div class="parameters">
-              <segment-button-group buttons=${this.cleaningModes} active=${this.activeCleaningMode} @select=${this.onCleaningModeChange}></segment-button-group>
+              <segment-button-group style="${styleAttr}" buttons=${this.cleaningModes} active=${this.activeCleaningMode} @select=${this.onCleaningModeChange}></segment-button-group>
               ${suctionMode}
               ${moppingMode}
               ${routeMode}
@@ -215,13 +215,15 @@ export class CustomCleaningPopup extends LitElement {
     this.suctionModes = Object.values(RoborockSuctionMode)
       .map(v => ({ icon: getSuctionIcon(v, 24, this.iconColor), value: v, disabled: !this.isSupportedSuctionMode(v, this.activeCleaningMode) }));
     const mode = localize(`suction_mode.${this.activeSuctionMode}`);
+    
+    const styleAttr = this.primaryColor ? `--primary-color: ${this.primaryColor};` : '';
 
     return html`
       <div class="mode-title">
         <div class="title">${localize('common.suction_mode')}</div>
         <div class="value">${mode}</div>
       </div>
-      <segment-button-group buttons=${this.suctionModes} active=${this.activeSuctionMode} @select=${this.onSuctionModeChange}></segment-button-group>
+      <segment-button-group style="${styleAttr}" buttons=${this.suctionModes} active=${this.activeSuctionMode} @select=${this.onSuctionModeChange}></segment-button-group>
     `;
   }
 
@@ -232,13 +234,15 @@ export class CustomCleaningPopup extends LitElement {
     this.mopModes = Object.values(RoborockMopMode)
       .map(v => ({ icon: getMoppingIcon(v, 24, this.iconColor), value: v, disabled: !this.isSupportedMopMode(v, this.activeCleaningMode) }));
     const mode = localize(`mop_mode.${this.activeMopMode}`);
+    
+    const styleAttr = this.primaryColor ? `--primary-color: ${this.primaryColor};` : '';
 
     return html`
       <div class="mode-title">
         <div class="title">${localize('common.mop_mode')}</div>
         <div class="value">${mode}</div>
       </div>
-      <segment-button-group buttons=${this.mopModes} active=${this.activeMopMode} @select=${this.onMoppingModeChange}></segment-button-group>
+      <segment-button-group style="${styleAttr}" buttons=${this.mopModes} active=${this.activeMopMode} @select=${this.onMoppingModeChange}></segment-button-group>
     `;
   }
 
@@ -246,13 +250,15 @@ export class CustomCleaningPopup extends LitElement {
     this.routeModes = Object.values(RoborockRouteMode)
       .map(v => ({ icon: getRouteIcon(v, 24, this.iconColor), value: v, disabled: !this.isSupportedRouteMode(v, this.activeCleaningMode) }));
     const mode = localize(`route_mode.${this.activeRouteMode}`);
+    
+    const styleAttr = this.primaryColor ? `--primary-color: ${this.primaryColor};` : '';
 
     return html`
       <div class="mode-title">
         <div class="title">${localize('common.route_mode')}</div>
         <div class="value">${mode}</div>
       </div>
-      <segment-button-group buttons=${this.routeModes} active=${this.activeRouteMode} @select=${this.onRouteModeChange}></segment-button-group>
+      <segment-button-group style="${styleAttr}" buttons=${this.routeModes} active=${this.activeRouteMode} @select=${this.onRouteModeChange}></segment-button-group>
     `;
   }
 
@@ -261,13 +267,15 @@ export class CustomCleaningPopup extends LitElement {
       { icon: getCycleIcon('1', 24, this.iconColor), value: '1' },
       { icon: getCycleIcon('2', 24, this.iconColor), value: '2' }
     ];
+    
+    const styleAttr = this.primaryColor ? `--primary-color: ${this.primaryColor};` : '';
 
     return html`
       <div class="mode-title">
         <div class="title">${localize('common.cycle_mode')}</div>
         <div class="value">x${this.activeCycleMode}</div>
       </div>
-      <segment-button-group buttons=${cycleModes} active=${this.activeCycleMode} @select=${this.onCycleModeChange}></segment-button-group>
+      <segment-button-group style="${styleAttr}" buttons=${cycleModes} active=${this.activeCycleMode} @select=${this.onCycleModeChange}></segment-button-group>
     `;
   }
 
@@ -284,11 +292,13 @@ export class CustomCleaningPopup extends LitElement {
     const header = this.inline 
       ? html`<div class="areas-header">${localize(`common.room_selection`)}</div>`
       : nothing;
+    
+    const styleAttr = this.primaryColor ? `--primary-color: ${this.primaryColor};` : '';
 
     return html`
       <div class="areas">
         ${header}
-        <multiselect-button-group buttons="${areas}" @select="${this.onAreasChange}"></multiselect-button-group>
+        <multiselect-button-group style="${styleAttr}" buttons="${areas}" @select="${this.onAreasChange}"></multiselect-button-group>
       </div>
     `;
   }
