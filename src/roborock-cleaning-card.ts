@@ -78,6 +78,7 @@ export class RoborockCleaningCard extends LitElement {
     super.updated(changedProps);
 
     if (changedProps.has('hass') && this.hass) {
+      console.log('[roborock-cleaning-card] hass updated, setting on robot');
       this.robot?.setHass(this.hass as any);
     }
   }
@@ -86,6 +87,9 @@ export class RoborockCleaningCard extends LitElement {
     if (!this.hass || !this.config) {
       return nothing;
     }
+
+    console.log('[roborock-cleaning-card] render called, robot:', this.robot);
+    console.log('[roborock-cleaning-card] robot has hass:', !!this.robot?.['hass']);
 
     // Get icon color
     this.iconColor = getComputedStyle(document.documentElement)
