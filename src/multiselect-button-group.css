@@ -12,7 +12,7 @@
     padding: 8px 16px;
     cursor: pointer;
     border-radius: 8px;
-    border: 1px solid transparent;
+    border: 1px solid var(--vc-primary-select-background);
 
     &.active {
         background-color: var(--vc-primary-select-background);
