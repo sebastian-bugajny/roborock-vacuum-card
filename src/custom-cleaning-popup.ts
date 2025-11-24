@@ -146,26 +146,36 @@ export class CustomCleaningPopup extends LitElement {
     }
 
     this.popupRequestInProgress = true;
+    console.log('[custom-cleaning-popup] 🚀 popupRequestInProgress set to true');
 
     try {
+      console.log('[custom-cleaning-popup] 1️⃣ Calling fixModesIfNeeded...');
       this.fixModesIfNeeded();
-      console.log('[custom-cleaning-popup] Setting suction mode:', this.activeSuctionMode);
+      console.log('[custom-cleaning-popup] ✅ fixModesIfNeeded completed');
+      
+      console.log('[custom-cleaning-popup] 2️⃣ Setting suction mode:', this.activeSuctionMode);
       await this.robot.setSuctionModeAsync(this.activeSuctionMode as RoborockSuctionMode);
+      console.log('[custom-cleaning-popup] ✅ Suction mode set, waiting...');
       await new Promise(r => setTimeout(r, delay));
+      console.log('[custom-cleaning-popup] ✅ Delay completed');
 
-      console.log('[custom-cleaning-popup] Setting mop mode:', this.activeMopMode);
+      console.log('[custom-cleaning-popup] 3️⃣ Setting mop mode:', this.activeMopMode);
       await this.robot.setMopModeAsync(this.activeMopMode as RoborockMopMode);
+      console.log('[custom-cleaning-popup] ✅ Mop mode set, waiting...');
       await new Promise(r => setTimeout(r, delay));
+      console.log('[custom-cleaning-popup] ✅ Delay completed');
 
-      console.log('[custom-cleaning-popup] Setting route mode:', this.activeRouteMode);
+      console.log('[custom-cleaning-popup] 4️⃣ Setting route mode:', this.activeRouteMode);
       await this.robot.setRouteModeAsync(this.activeRouteMode as RoborockRouteMode);
+      console.log('[custom-cleaning-popup] ✅ Route mode set, waiting...');
       await new Promise(r => setTimeout(r, delay));
+      console.log('[custom-cleaning-popup] ✅ Delay completed');
 
       const area_ids = this.activeAreas.map(v => parseInt(v, 10));
-      console.log('[custom-cleaning-popup] Starting segments cleaning:', area_ids, 'cycles:', this.activeCycleMode);
+      console.log('[custom-cleaning-popup] 5️⃣ Starting segments cleaning:', area_ids, 'cycles:', this.activeCycleMode);
       await this.robot.startSegmentsCleaningAsync(area_ids, parseInt(this.activeCycleMode, 10));
 
-      console.log('[custom-cleaning-popup] Cleaning started successfully');
+      console.log('[custom-cleaning-popup] ✅✅✅ Cleaning started successfully ✅✅✅');
       this.closePopup();
     } catch (error) {
       console.error('[custom-cleaning-popup] Error during cleaning:', error);
