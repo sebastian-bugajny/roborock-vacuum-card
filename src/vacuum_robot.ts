@@ -69,15 +69,24 @@ export class VacuumRobot {
   }
 
   public getSuctionMode(): RoborockSuctionMode {
+    if (!this.hass || !this.entity_id) {
+      return RoborockSuctionMode.Turbo; // Default value
+    }
     return this.getAttributeValue(this.hass.states[this.entity_id], 'fan_speed');
   }
 
   public getMopMode(): RoborockMopMode {
+    if (!this.hass || !this.entity_id) {
+      return RoborockMopMode.High; // Default value
+    }
     const entityId = this.mop_intensity_entity ?? `select.${this.name}_mop_intensity`;
     return this.state(entityId);
   }
 
   public getRouteMode(): RoborockRouteMode {
+    if (!this.hass || !this.entity_id) {
+      return RoborockRouteMode.Standard; // Default value
+    }
     const entityId = this.mop_mode_entity ?? `select.${this.name}_mop_mode`;
     return this.state(entityId);
   }
