@@ -1,7 +1,7 @@
 :host {
     --vc-background: var(--ha-card-background, var(--card-background-color, white));
     --vc-primary-select-background: color-mix(in srgb, var(--primary-color) 40%, var(--vc-background));
-    
+
     display: flex;
     box-sizing: border-box;
     border: 1px solid var(--vc-primary-select-background);
@@ -18,7 +18,8 @@
     cursor: pointer;
 
     &.active {
-        background-color: var(--vc-primary-select-background);;
+        background-color: var(--vc-primary-select-background);
+        ;
     }
 
     &.disabled {

@@ -165,9 +165,9 @@ export class RoborockVacuumCard extends LitElement {
     const inline = this.config.show_custom_cleaning_inline ?? false;
 
     return html`
-      <custom-cleaning-popup 
-        .robot=${this.robot} 
-        .areas=${areas} 
+      <custom-cleaning-popup
+        .robot=${this.robot}
+        .areas=${areas}
         iconColor=${this.iconColor}
         .inline=${inline}
         @close=${this.onPopupClose}>

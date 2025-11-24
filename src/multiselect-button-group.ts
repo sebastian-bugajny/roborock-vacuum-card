@@ -25,9 +25,9 @@ export class MultiselectButtonGroup extends LitElement {
         if (!this.buttons)
             return nothing;
 
-        const buttons = this.buttons.map(({icon, text, value}) => {
+        const buttons = this.buttons.map(({ icon, text, value }) => {
             const active = this.selection[value] ? 'active' : '';
-            
+
             return html`
                 <div class="multiselect-button ${active}" @click=${() => this._onItemClick(value)}>
                     <ha-icon icon="${icon}"></ha-icon> <div class="text">${text}</div>
