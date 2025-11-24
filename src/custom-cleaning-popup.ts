@@ -74,12 +74,22 @@ export class CustomCleaningPopup extends LitElement {
       value: RoborockCleaningMode.Vac
     }];
 
-    this.activeSuctionMode = this.robot.getSuctionMode();
-    this.activeMopMode = this.robot.getMopMode();
-    this.activeRouteMode = this.robot.getRouteMode();
-
     // Always start with VacAndMop mode
     this.activeCleaningMode = RoborockCleaningMode.VacAndMop;
+  }
+  
+  protected firstUpdated(changedProps: any) {
+    super.firstUpdated(changedProps);
+    
+    // Initialize modes from robot state (only after robot has hass)
+    try {
+      this.activeSuctionMode = this.robot.getSuctionMode();
+      this.activeMopMode = this.robot.getMopMode();
+      this.activeRouteMode = this.robot.getRouteMode();
+    } catch (e) {
+      console.warn('[custom-cleaning-popup] Could not get initial modes from robot, using defaults', e);
+      // Keep default values if we can't get them from robot
+    }
     
     // Set defaults based on cleaning mode
     this.fixModesIfNeeded();
