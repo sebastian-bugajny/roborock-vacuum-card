@@ -92,12 +92,20 @@ export class VacuumRobot {
   }
 
   public callServiceAsync(service: string) {
+    if (!this.hass || !this.entity_id) {
+      console.error('[VacuumRobot] Cannot call service: hass or entity_id not set');
+      return Promise.reject('Robot not initialized');
+    }
     return this.hass.callService('vacuum', service, {
       entity_id: this.entity_id,
     });
   }
 
   public startSegmentsCleaningAsync(roborock_area_ids: number[], repeat: number) {
+    if (!this.hass || !this.entity_id) {
+      console.error('[VacuumRobot] Cannot start segments cleaning: hass or entity_id not set');
+      return Promise.reject('Robot not initialized');
+    }
     return this.hass.callService('vacuum', 'send_command', {
       entity_id: this.entity_id,
       command: 'app_segment_clean',
@@ -109,6 +117,10 @@ export class VacuumRobot {
   }
 
   public setSuctionModeAsync(value: RoborockSuctionMode) {
+    if (!this.hass || !this.entity_id) {
+      console.error('[VacuumRobot] Cannot set suction mode: hass or entity_id not set');
+      return Promise.reject('Robot not initialized');
+    }
     return this.hass.callService('vacuum', 'set_fan_speed', {
       entity_id: this.entity_id,
       fan_speed: value,
@@ -116,6 +128,10 @@ export class VacuumRobot {
   }
 
   public setMopModeAsync(value: RoborockMopMode) {
+    if (!this.hass || !this.entity_id) {
+      console.error('[VacuumRobot] Cannot set mop mode: hass or entity_id not set');
+      return Promise.reject('Robot not initialized');
+    }
     const entityId = this.mop_intensity_entity ?? `select.${this.name}_mop_intensity`;
     return this.hass.callService('select', 'select_option', {
       entity_id: entityId,
@@ -124,6 +140,10 @@ export class VacuumRobot {
   }
 
   public setRouteModeAsync(value: RoborockRouteMode) {
+    if (!this.hass || !this.entity_id) {
+      console.error('[VacuumRobot] Cannot set route mode: hass or entity_id not set');
+      return Promise.reject('Robot not initialized');
+    }
     const entityId = this.mop_mode_entity ?? `select.${this.name}_mop_mode`;
     return this.hass.callService('select', 'select_option', {
       entity_id: entityId,
