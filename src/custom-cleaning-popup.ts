@@ -134,8 +134,10 @@ export class CustomCleaningPopup extends LitElement {
   private async onRunCleaning() {
     const delay = 100;
 
-    console.log('[custom-cleaning-popup] onRunCleaning called');
+    console.log('🔵🔵🔵 [CLEAN BUTTON CLICKED] onRunCleaning called 🔵🔵🔵');
     console.log('[custom-cleaning-popup] robot:', this.robot);
+    console.log('[custom-cleaning-popup] robot.hass:', (this.robot as any)?.hass);
+    console.log('[custom-cleaning-popup] robot.entity_id:', (this.robot as any)?.entity_id);
     console.log('[custom-cleaning-popup] activeAreas:', this.activeAreas);
 
     if (this.activeAreas.length == 0) {
@@ -175,8 +177,10 @@ export class CustomCleaningPopup extends LitElement {
   private async onCleanAll() {
     const delay = 100;
 
-    console.log('[custom-cleaning-popup] onCleanAll called');
+    console.log('🟢🟢🟢 [CLEAN ALL BUTTON CLICKED] onCleanAll called 🟢🟢🟢');
     console.log('[custom-cleaning-popup] robot:', this.robot);
+    console.log('[custom-cleaning-popup] robot.hass:', (this.robot as any)?.hass);
+    console.log('[custom-cleaning-popup] robot.entity_id:', (this.robot as any)?.entity_id);
 
     this.popupRequestInProgress = true;
 
