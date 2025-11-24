@@ -125,44 +125,77 @@ export class CustomCleaningPopup extends LitElement {
   private async onRunCleaning() {
     const delay = 100;
 
-    if (this.activeAreas.length == 0)
+    console.log('[custom-cleaning-popup] onRunCleaning called');
+    console.log('[custom-cleaning-popup] robot:', this.robot);
+    console.log('[custom-cleaning-popup] activeAreas:', this.activeAreas);
+
+    if (this.activeAreas.length == 0) {
+      console.log('[custom-cleaning-popup] No areas selected, returning');
       return;
+    }
 
     this.popupRequestInProgress = true;
 
-    this.fixModesIfNeeded();
-    await this.robot.setSuctionModeAsync(this.activeSuctionMode as RoborockSuctionMode);
-    await new Promise(r => setTimeout(r, delay));
-    await this.robot.setMopModeAsync(this.activeMopMode as RoborockMopMode);
-    await new Promise(r => setTimeout(r, delay));
-    await this.robot.setRouteModeAsync(this.activeRouteMode as RoborockRouteMode);
-    await new Promise(r => setTimeout(r, delay));
+    try {
+      this.fixModesIfNeeded();
+      console.log('[custom-cleaning-popup] Setting suction mode:', this.activeSuctionMode);
+      await this.robot.setSuctionModeAsync(this.activeSuctionMode as RoborockSuctionMode);
+      await new Promise(r => setTimeout(r, delay));
+      
+      console.log('[custom-cleaning-popup] Setting mop mode:', this.activeMopMode);
+      await this.robot.setMopModeAsync(this.activeMopMode as RoborockMopMode);
+      await new Promise(r => setTimeout(r, delay));
+      
+      console.log('[custom-cleaning-popup] Setting route mode:', this.activeRouteMode);
+      await this.robot.setRouteModeAsync(this.activeRouteMode as RoborockRouteMode);
+      await new Promise(r => setTimeout(r, delay));
 
-    const area_ids = this.activeAreas.map(v => parseInt(v, 10));
-    await this.robot.startSegmentsCleaningAsync(area_ids, parseInt(this.activeCycleMode, 10));
+      const area_ids = this.activeAreas.map(v => parseInt(v, 10));
+      console.log('[custom-cleaning-popup] Starting segments cleaning:', area_ids, 'cycles:', this.activeCycleMode);
+      await this.robot.startSegmentsCleaningAsync(area_ids, parseInt(this.activeCycleMode, 10));
 
-    this.closePopup();
-    this.popupRequestInProgress = false;
+      console.log('[custom-cleaning-popup] Cleaning started successfully');
+      this.closePopup();
+    } catch (error) {
+      console.error('[custom-cleaning-popup] Error during cleaning:', error);
+    } finally {
+      this.popupRequestInProgress = false;
+    }
   }
 
   private async onCleanAll() {
     const delay = 100;
 
+    console.log('[custom-cleaning-popup] onCleanAll called');
+    console.log('[custom-cleaning-popup] robot:', this.robot);
+
     this.popupRequestInProgress = true;
 
-    this.fixModesIfNeeded();
-    await this.robot.setSuctionModeAsync(this.activeSuctionMode as RoborockSuctionMode);
-    await new Promise(r => setTimeout(r, delay));
-    await this.robot.setMopModeAsync(this.activeMopMode as RoborockMopMode);
-    await new Promise(r => setTimeout(r, delay));
-    await this.robot.setRouteModeAsync(this.activeRouteMode as RoborockRouteMode);
-    await new Promise(r => setTimeout(r, delay));
+    try {
+      this.fixModesIfNeeded();
+      console.log('[custom-cleaning-popup] Setting suction mode:', this.activeSuctionMode);
+      await this.robot.setSuctionModeAsync(this.activeSuctionMode as RoborockSuctionMode);
+      await new Promise(r => setTimeout(r, delay));
+      
+      console.log('[custom-cleaning-popup] Setting mop mode:', this.activeMopMode);
+      await this.robot.setMopModeAsync(this.activeMopMode as RoborockMopMode);
+      await new Promise(r => setTimeout(r, delay));
+      
+      console.log('[custom-cleaning-popup] Setting route mode:', this.activeRouteMode);
+      await this.robot.setRouteModeAsync(this.activeRouteMode as RoborockRouteMode);
+      await new Promise(r => setTimeout(r, delay));
 
-    // Start cleaning without specifying areas (whole home)
-    await this.robot.callServiceAsync('start');
+      // Start cleaning without specifying areas (whole home)
+      console.log('[custom-cleaning-popup] Starting whole home cleaning');
+      await this.robot.callServiceAsync('start');
 
-    this.closePopup();
-    this.popupRequestInProgress = false;
+      console.log('[custom-cleaning-popup] Cleaning started successfully');
+      this.closePopup();
+    } catch (error) {
+      console.error('[custom-cleaning-popup] Error during cleaning:', error);
+    } finally {
+      this.popupRequestInProgress = false;
+    }
   }
 
   private onPopupClose(event: MouseEvent) {
