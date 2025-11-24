@@ -51,11 +51,11 @@
       box-sizing: border-box;
 
       .areas-header {
-        font-size: 22px;
-        line-height: 28px;
+        font-size: 18px;
+        line-height: 24px;
         font-weight: 400;
         text-align: center;
-        padding: 16px 4px 12px 4px;
+        padding: 4px 4px 8px 4px;
       }
     }
 
@@ -101,8 +101,8 @@
     .text {
       flex: 1;
       padding: 10px 4px;
-      font-size: 22px;
-      line-height: 28px;
+      font-size: 18px;
+      line-height: 24px;
       font-weight: 400;
       text-align: center;
     }
@@ -145,6 +145,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    gap: 12px;
     padding: 0px 24px 24px 24px;
 
     .mwc-button {
@@ -206,11 +207,13 @@
     .actions {
       flex-wrap: wrap;
       justify-content: center;
+      gap: 8px;
 
       .clean-button {
         padding: 8px 24px;
-        width: 100%;
-        max-width: 300px;
+        flex: 1;
+        min-width: 120px;
+        max-width: 150px;
       }
     }
   }

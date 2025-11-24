@@ -145,6 +145,26 @@ export class CustomCleaningPopup extends LitElement {
     this.popupRequestInProgress = false;
   }
 
+  private async onCleanAll() {
+    const delay = 100;
+
+    this.popupRequestInProgress = true;
+
+    this.fixModesIfNeeded();
+    await this.robot.setSuctionModeAsync(this.activeSuctionMode as RoborockSuctionMode);
+    await new Promise(r => setTimeout(r, delay));
+    await this.robot.setMopModeAsync(this.activeMopMode as RoborockMopMode);
+    await new Promise(r => setTimeout(r, delay));
+    await this.robot.setRouteModeAsync(this.activeRouteMode as RoborockRouteMode);
+    await new Promise(r => setTimeout(r, delay));
+
+    // Start cleaning without specifying areas (whole home)
+    await this.robot.callServiceAsync('start');
+
+    this.closePopup();
+    this.popupRequestInProgress = false;
+  }
+
   private onPopupClose(event: MouseEvent) {
     event.stopPropagation();
     this.closePopup();
@@ -208,6 +228,7 @@ export class CustomCleaningPopup extends LitElement {
           </div>
           <div class="actions">
             <button class="clean-button ${this.activeAreas.length == 0 ? 'disabled' : ''}" @click=${this.onRunCleaning}>CLEAN</button>
+            <button class="clean-button" @click=${this.onCleanAll}>CLEAN ALL</button>
           </div>
           ${progress}
         </div>
