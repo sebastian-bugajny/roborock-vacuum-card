@@ -55,6 +55,7 @@ export class CustomCleaningPopup extends LitElement {
   private suctionModes: SvgButton<string>[] = [];
   private mopModes: SvgButton<string>[] = [];
   private routeModes: SvgButton<string>[] = [];
+  private modesInitialized: boolean = false;
 
   static get styles(): CSSResultGroup {
     return styles;
@@ -78,21 +79,25 @@ export class CustomCleaningPopup extends LitElement {
     this.activeCleaningMode = RoborockCleaningMode.VacAndMop;
   }
   
-  protected firstUpdated(changedProps: any) {
-    super.firstUpdated(changedProps);
+  protected willUpdate(changedProps: Map<string, any>) {
+    super.willUpdate(changedProps);
     
-    // Initialize modes from robot state (only after robot has hass)
-    try {
-      this.activeSuctionMode = this.robot.getSuctionMode();
-      this.activeMopMode = this.robot.getMopMode();
-      this.activeRouteMode = this.robot.getRouteMode();
-    } catch (e) {
-      console.warn('[custom-cleaning-popup] Could not get initial modes from robot, using defaults', e);
-      // Keep default values if we can't get them from robot
+    // Initialize modes from robot state when robot becomes available
+    if (!this.modesInitialized && this.robot) {
+      try {
+        this.activeSuctionMode = this.robot.getSuctionMode();
+        this.activeMopMode = this.robot.getMopMode();
+        this.activeRouteMode = this.robot.getRouteMode();
+        this.modesInitialized = true;
+        console.log('[custom-cleaning-popup] Modes initialized from robot');
+      } catch (e) {
+        console.warn('[custom-cleaning-popup] Could not get initial modes from robot, using defaults', e);
+        // Keep default values if we can't get them from robot
+      }
+      
+      // Set defaults based on cleaning mode
+      this.fixModesIfNeeded();
     }
-    
-    // Set defaults based on cleaning mode
-    this.fixModesIfNeeded();
   }
 
   private onCleaningModeChange(e: StringEvent) {
