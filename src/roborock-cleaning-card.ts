@@ -97,6 +97,12 @@ export class RoborockCleaningCard extends LitElement {
 
     console.log('[roborock-cleaning-card] render called, robot:', this.robot);
     console.log('[roborock-cleaning-card] robot has hass:', !!this.robot?.['hass']);
+    
+    // Verify robot has all required data before rendering popup
+    const robotHass = (this.robot as any).hass;
+    const robotEntityId = (this.robot as any).entity_id;
+    console.log('[roborock-cleaning-card] robot.hass:', robotHass);
+    console.log('[roborock-cleaning-card] robot.entity_id:', robotEntityId);
 
     // Get icon color
     this.iconColor = getComputedStyle(document.documentElement)
