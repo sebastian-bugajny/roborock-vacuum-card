@@ -58,20 +58,33 @@ export class RoborockCleaningCard extends LitElement {
     }
 
     // Get colors from Home Assistant theme
-    // Try multiple sources for primary color
-    let primaryColor = getComputedStyle(document.documentElement)
-      .getPropertyValue("--primary-color")
-      .trim();
+    // Since we don't have Shadow DOM, try to get from this element or closest parent
+    let primaryColor = '';
+    let cardBackground = '';
     
-    // If not found, try from body or use the theme's accent color
-    if (!primaryColor) {
-      primaryColor = getComputedStyle(document.body)
-        .getPropertyValue("--primary-color")
-        .trim();
+    try {
+      // Try to get from this element's computed style
+      const computedStyle = getComputedStyle(this);
+      primaryColor = computedStyle.getPropertyValue("--primary-color").trim();
+      cardBackground = computedStyle.getPropertyValue("--ha-card-background").trim();
+      
+      // If not found on this element, try document root
+      if (!primaryColor) {
+        primaryColor = getComputedStyle(document.documentElement)
+          .getPropertyValue("--primary-color").trim();
+      }
+      
+      if (!cardBackground) {
+        cardBackground = getComputedStyle(document.documentElement)
+          .getPropertyValue("--ha-card-background").trim();
+      }
+    } catch (e) {
+      console.error('[roborock-cleaning-card] Error getting styles:', e);
     }
     
-    // Debug: log the color
+    // Debug: log the colors
     console.log('[roborock-cleaning-card] primaryColor:', primaryColor);
+    console.log('[roborock-cleaning-card] cardBackground:', cardBackground);
     
     // Get icon color
     this.iconColor = getComputedStyle(document.documentElement)
