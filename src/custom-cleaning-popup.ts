@@ -78,13 +78,13 @@ export class CustomCleaningPopup extends LitElement {
     // Always start with VacAndMop mode
     this.activeCleaningMode = RoborockCleaningMode.VacAndMop;
   }
-  
+
   protected willUpdate(changedProps: Map<string, any>) {
     super.willUpdate(changedProps);
-    
+
     console.log('[custom-cleaning-popup] willUpdate, robot:', this.robot);
     console.log('[custom-cleaning-popup] modesInitialized:', this.modesInitialized);
-    
+
     // Initialize modes from robot state when robot becomes available
     if (!this.modesInitialized && this.robot) {
       try {
@@ -98,7 +98,7 @@ export class CustomCleaningPopup extends LitElement {
         console.warn('[custom-cleaning-popup] Could not get initial modes from robot, using defaults', e);
         // Keep default values if we can't get them from robot
       }
-      
+
       // Set defaults based on cleaning mode
       this.fixModesIfNeeded();
     }
@@ -150,11 +150,11 @@ export class CustomCleaningPopup extends LitElement {
       console.log('[custom-cleaning-popup] Setting suction mode:', this.activeSuctionMode);
       await this.robot.setSuctionModeAsync(this.activeSuctionMode as RoborockSuctionMode);
       await new Promise(r => setTimeout(r, delay));
-      
+
       console.log('[custom-cleaning-popup] Setting mop mode:', this.activeMopMode);
       await this.robot.setMopModeAsync(this.activeMopMode as RoborockMopMode);
       await new Promise(r => setTimeout(r, delay));
-      
+
       console.log('[custom-cleaning-popup] Setting route mode:', this.activeRouteMode);
       await this.robot.setRouteModeAsync(this.activeRouteMode as RoborockRouteMode);
       await new Promise(r => setTimeout(r, delay));
@@ -185,11 +185,11 @@ export class CustomCleaningPopup extends LitElement {
       console.log('[custom-cleaning-popup] Setting suction mode:', this.activeSuctionMode);
       await this.robot.setSuctionModeAsync(this.activeSuctionMode as RoborockSuctionMode);
       await new Promise(r => setTimeout(r, delay));
-      
+
       console.log('[custom-cleaning-popup] Setting mop mode:', this.activeMopMode);
       await this.robot.setMopModeAsync(this.activeMopMode as RoborockMopMode);
       await new Promise(r => setTimeout(r, delay));
-      
+
       console.log('[custom-cleaning-popup] Setting route mode:', this.activeRouteMode);
       await this.robot.setRouteModeAsync(this.activeRouteMode as RoborockRouteMode);
       await new Promise(r => setTimeout(r, delay));
@@ -239,15 +239,15 @@ export class CustomCleaningPopup extends LitElement {
 
     const containerClass = this.inline ? 'inline-container' : 'popup-background';
     const closeButton = this.inline ? nothing : html`<ha-icon-button icon="mdi:close" @click=${this.onPopupClose} ><ha-icon icon="mdi:close"></ha-icon></ha-icon-button>`;
-    
+
     // Calculate the actual color that should be used for selection background
     // This matches the calculation in segment-button-group.css: color-mix(in srgb, var(--primary-color) 40%, var(--vc-background))
     let styleAttr = '';
     if (this.primaryColor) {
       // We need to pass both --primary-color and calculate --vc-primary-select-background
-      const cardBg = getComputedStyle(document.documentElement).getPropertyValue("--ha-card-background").trim() || 
-                     getComputedStyle(document.documentElement).getPropertyValue("--card-background-color").trim() || 
-                     'white';
+      const cardBg = getComputedStyle(document.documentElement).getPropertyValue("--ha-card-background").trim() ||
+        getComputedStyle(document.documentElement).getPropertyValue("--card-background-color").trim() ||
+        'white';
       styleAttr = `--primary-color: ${this.primaryColor}; --ha-card-background: ${cardBg}; --card-background-color: ${cardBg};`;
     }
 
@@ -362,7 +362,7 @@ export class CustomCleaningPopup extends LitElement {
         }
       });
 
-    const header = this.inline 
+    const header = this.inline
       ? html`<div class="areas-header">${localize(`common.room_selection`)}</div>`
       : nothing;
 
@@ -379,7 +379,7 @@ export class CustomCleaningPopup extends LitElement {
       this.activeSuctionMode = this.activeCleaningMode == RoborockCleaningMode.Mop ? RoborockSuctionMode.Off : RoborockSuctionMode.Turbo;
     if (!VacuumRobot.isSupportedMopMode(this.activeMopMode, this.activeCleaningMode))
       this.activeMopMode = this.activeCleaningMode == RoborockCleaningMode.Vac ? RoborockMopMode.Off : RoborockMopMode.High;
-    
+
     // Set route mode based on cleaning mode
     if (this.activeCleaningMode == RoborockCleaningMode.Mop) {
       // For Mop mode, always set Deep as default

@@ -32,33 +32,33 @@ export class RoborockCleaningCard extends LitElement {
   protected createRenderRoot() {
     return this;
   }
-  
+
   connectedCallback() {
     super.connectedCallback();
-    
+
     console.log('[roborock-cleaning-card] connectedCallback called');
-    
+
     // Try to find and use the correct primary color from the theme
     const docStyle = getComputedStyle(document.documentElement);
-    
+
     // Get all potentially useful color variables
     const primaryColor = docStyle.getPropertyValue("--primary-color").trim();
     const stateActiveColor = docStyle.getPropertyValue("--state-active-color").trim();
     const accentColor = docStyle.getPropertyValue("--accent-color").trim();
     const lightPrimaryColor = docStyle.getPropertyValue("--light-primary-color").trim();
     const darkPrimaryColor = docStyle.getPropertyValue("--dark-primary-color").trim();
-    
+
     console.log('[roborock-cleaning-card] CSS Variables:');
     console.log('  --primary-color:', primaryColor);
     console.log('  --state-active-color:', stateActiveColor);
     console.log('  --accent-color:', accentColor);
     console.log('  --light-primary-color:', lightPrimaryColor);
     console.log('  --dark-primary-color:', darkPrimaryColor);
-    
+
     // Use the same blue color as the main card's Shadow DOM default
     // This is the color defined in styles.css line 10
     const defaultBlue = '#89B3F8';
-    
+
     console.log('[roborock-cleaning-card] Using default blue color:', defaultBlue);
     this.style.setProperty('--primary-color', defaultBlue);
   }
@@ -74,7 +74,7 @@ export class RoborockCleaningCard extends LitElement {
     this.robot.setEntity(config.entity);
     this.robot.setMopIntensityEntity(config.mop_intensity_entity);
     this.robot.setMopModeEntity(config.mop_mode_entity);
-    
+
     console.log('[roborock-cleaning-card] Robot configured:');
     console.log('  entity:', config.entity);
     console.log('  mop_intensity_entity:', config.mop_intensity_entity);
@@ -108,9 +108,9 @@ export class RoborockCleaningCard extends LitElement {
     // Don't pass primaryColor - let components use their default CSS variables
     // which should inherit from the document/theme
     return html`
-      <custom-cleaning-popup 
-        .robot=${this.robot} 
-        .areas=${areas} 
+      <custom-cleaning-popup
+        .robot=${this.robot}
+        .areas=${areas}
         iconColor=${this.iconColor}
         .inline=${true}>
       </custom-cleaning-popup>
@@ -123,21 +123,34 @@ export class RoborockCleaningCard extends LitElement {
     if (!this.config.areas)
       return areas;
 
-    for (let { area_id, roborock_area_id } of this.config.areas) {
+    console.log('[roborock-cleaning-card] Processing areas:', this.config.areas);
+    console.log('[roborock-cleaning-card] Available hass.areas:', (this.hass as any).areas);
+
+    for (let areaConfig of this.config.areas) {
+      const { area_id, roborock_area_id } = areaConfig;
+      console.log('[roborock-cleaning-card] Processing area:', { area_id, roborock_area_id });
+
       const normalizedAreaId = area_id.replace(/ /g, '_').toLowerCase();
       const hassArea = (this.hass as any).areas?.[normalizedAreaId];
-      
+
+      console.log('[roborock-cleaning-card] Looking for normalized area:', normalizedAreaId);
+      console.log('[roborock-cleaning-card] Found hassArea:', hassArea);
+
       if (!hassArea)
         continue;
 
-      areas.push({
+      const processedArea = {
         icon: hassArea.icon,
         name: hassArea.name,
         area_id: normalizedAreaId,
         roborock_area_id,
-      });
+      };
+      
+      console.log('[roborock-cleaning-card] Adding area:', processedArea);
+      areas.push(processedArea);
     }
 
+    console.log('[roborock-cleaning-card] Final areas array:', areas);
     return areas;
   }
 

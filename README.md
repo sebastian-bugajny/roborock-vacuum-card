@@ -155,4 +155,3 @@ areas:
 - `default_modes` - Optional - Default settings per cleaning mode
 
 This card displays the cleaning control panel as a standalone card that can be positioned independently of the main vacuum status card.
-

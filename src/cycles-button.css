@@ -1,7 +1,7 @@
 :host {
     --vc-background: var(--ha-card-background, var(--card-background-color, white));
     --vc-primary-select-background: color-mix(in srgb, var(--primary-color) 40%, var(--vc-background));
-    
+
     cursor: pointer;
 }
 

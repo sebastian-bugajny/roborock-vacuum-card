@@ -25,7 +25,7 @@ export class SegmentButtonGroup extends LitElement {
             const clsDisabled = disabled ? 'disabled' : ''
             const img = icon ? html`${icon}` : nothing;
             const txt = text ? html`<div class="text">${text}</div>` : nothing;
-            
+
             return html`
             <div class="segment-button ${active} ${clsDisabled}" @click=${() => this._onItemClick(value, disabled)}>
                 ${img}${txt}
