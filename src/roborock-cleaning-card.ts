@@ -32,6 +32,24 @@ export class RoborockCleaningCard extends LitElement {
   protected createRenderRoot() {
     return this;
   }
+  
+  connectedCallback() {
+    super.connectedCallback();
+    
+    // Try to find and use the correct primary color from the theme
+    // Look for state-active-color or other alternatives
+    const stateActiveColor = getComputedStyle(document.documentElement)
+      .getPropertyValue("--state-active-color").trim();
+    const accentColor = getComputedStyle(document.documentElement)
+      .getPropertyValue("--accent-color").trim();
+    
+    // Set CSS variable on this element to be inherited by children
+    if (stateActiveColor) {
+      this.style.setProperty('--primary-color', stateActiveColor);
+    } else if (accentColor) {
+      this.style.setProperty('--primary-color', accentColor);
+    }
+  }
 
   setConfig(config: RoborockCleaningCardConfig): void {
     if (!config.entity) {
@@ -57,35 +75,6 @@ export class RoborockCleaningCard extends LitElement {
       return nothing;
     }
 
-    // Get colors from Home Assistant theme
-    // Since we don't have Shadow DOM, try to get from this element or closest parent
-    let primaryColor = '';
-    let cardBackground = '';
-    
-    try {
-      // Try to get from this element's computed style
-      const computedStyle = getComputedStyle(this);
-      primaryColor = computedStyle.getPropertyValue("--primary-color").trim();
-      cardBackground = computedStyle.getPropertyValue("--ha-card-background").trim();
-      
-      // If not found on this element, try document root
-      if (!primaryColor) {
-        primaryColor = getComputedStyle(document.documentElement)
-          .getPropertyValue("--primary-color").trim();
-      }
-      
-      if (!cardBackground) {
-        cardBackground = getComputedStyle(document.documentElement)
-          .getPropertyValue("--ha-card-background").trim();
-      }
-    } catch (e) {
-      console.error('[roborock-cleaning-card] Error getting styles:', e);
-    }
-    
-    // Debug: log the colors
-    console.log('[roborock-cleaning-card] primaryColor:', primaryColor);
-    console.log('[roborock-cleaning-card] cardBackground:', cardBackground);
-    
     // Get icon color
     this.iconColor = getComputedStyle(document.documentElement)
       .getPropertyValue("--state-icon-color")
@@ -93,12 +82,13 @@ export class RoborockCleaningCard extends LitElement {
 
     const areas = this.getAreas();
 
+    // Don't pass primaryColor - let components use their default CSS variables
+    // which should inherit from the document/theme
     return html`
       <custom-cleaning-popup 
         robot=${this.robot} 
         .areas=${areas} 
         iconColor=${this.iconColor}
-        primaryColor=${primaryColor || undefined}
         .inline=${true}>
       </custom-cleaning-popup>
     `;
