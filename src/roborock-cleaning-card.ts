@@ -55,16 +55,12 @@ export class RoborockCleaningCard extends LitElement {
     console.log('  --light-primary-color:', lightPrimaryColor);
     console.log('  --dark-primary-color:', darkPrimaryColor);
     
-    // Set CSS variable on this element to be inherited by children
-    if (stateActiveColor) {
-      console.log('[roborock-cleaning-card] Using --state-active-color:', stateActiveColor);
-      this.style.setProperty('--primary-color', stateActiveColor);
-    } else if (accentColor) {
-      console.log('[roborock-cleaning-card] Using --accent-color:', accentColor);
-      this.style.setProperty('--primary-color', accentColor);
-    } else {
-      console.log('[roborock-cleaning-card] No alternative color found, keeping default');
-    }
+    // Use the same blue color as the main card's Shadow DOM default
+    // This is the color defined in styles.css line 10
+    const defaultBlue = '#89B3F8';
+    
+    console.log('[roborock-cleaning-card] Using default blue color:', defaultBlue);
+    this.style.setProperty('--primary-color', defaultBlue);
   }
 
   setConfig(config: RoborockCleaningCardConfig): void {
