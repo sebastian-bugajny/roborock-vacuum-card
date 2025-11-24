@@ -70,6 +70,9 @@ export class RoborockCleaningCard extends LitElement {
         .trim();
     }
     
+    // Debug: log the color
+    console.log('[roborock-cleaning-card] primaryColor:', primaryColor);
+    
     // Get icon color
     this.iconColor = getComputedStyle(document.documentElement)
       .getPropertyValue("--state-icon-color")
