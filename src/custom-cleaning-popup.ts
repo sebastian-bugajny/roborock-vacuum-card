@@ -373,7 +373,7 @@ export class CustomCleaningPopup extends LitElement {
     return html`
       <div class="areas">
         ${header}
-        <multiselect-button-group primaryColor=${this.primaryColor} buttons="${areas}" @select="${this.onAreasChange}"></multiselect-button-group>
+        <multiselect-button-group primaryColor=${this.primaryColor} .buttons=${areas} @select=${this.onAreasChange}></multiselect-button-group>
       </div>
     `;
   }
