@@ -68,10 +68,17 @@ export class RoborockCleaningCard extends LitElement {
       throw new Error(localize('error.missing_entity'));
     }
 
+    console.log('[roborock-cleaning-card] setConfig called with:', config);
+
     this.config = config;
     this.robot.setEntity(config.entity);
     this.robot.setMopIntensityEntity(config.mop_intensity_entity);
     this.robot.setMopModeEntity(config.mop_mode_entity);
+    
+    console.log('[roborock-cleaning-card] Robot configured:');
+    console.log('  entity:', config.entity);
+    console.log('  mop_intensity_entity:', config.mop_intensity_entity);
+    console.log('  mop_mode_entity:', config.mop_mode_entity);
   }
 
   protected updated(changedProps: Map<string, any>): void {
