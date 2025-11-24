@@ -36,18 +36,34 @@ export class RoborockCleaningCard extends LitElement {
   connectedCallback() {
     super.connectedCallback();
     
+    console.log('[roborock-cleaning-card] connectedCallback called');
+    
     // Try to find and use the correct primary color from the theme
-    // Look for state-active-color or other alternatives
-    const stateActiveColor = getComputedStyle(document.documentElement)
-      .getPropertyValue("--state-active-color").trim();
-    const accentColor = getComputedStyle(document.documentElement)
-      .getPropertyValue("--accent-color").trim();
+    const docStyle = getComputedStyle(document.documentElement);
+    
+    // Get all potentially useful color variables
+    const primaryColor = docStyle.getPropertyValue("--primary-color").trim();
+    const stateActiveColor = docStyle.getPropertyValue("--state-active-color").trim();
+    const accentColor = docStyle.getPropertyValue("--accent-color").trim();
+    const lightPrimaryColor = docStyle.getPropertyValue("--light-primary-color").trim();
+    const darkPrimaryColor = docStyle.getPropertyValue("--dark-primary-color").trim();
+    
+    console.log('[roborock-cleaning-card] CSS Variables:');
+    console.log('  --primary-color:', primaryColor);
+    console.log('  --state-active-color:', stateActiveColor);
+    console.log('  --accent-color:', accentColor);
+    console.log('  --light-primary-color:', lightPrimaryColor);
+    console.log('  --dark-primary-color:', darkPrimaryColor);
     
     // Set CSS variable on this element to be inherited by children
     if (stateActiveColor) {
+      console.log('[roborock-cleaning-card] Using --state-active-color:', stateActiveColor);
       this.style.setProperty('--primary-color', stateActiveColor);
     } else if (accentColor) {
+      console.log('[roborock-cleaning-card] Using --accent-color:', accentColor);
       this.style.setProperty('--primary-color', accentColor);
+    } else {
+      console.log('[roborock-cleaning-card] No alternative color found, keeping default');
     }
   }
 
