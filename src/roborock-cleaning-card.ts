@@ -98,7 +98,7 @@ export class RoborockCleaningCard extends LitElement {
     // which should inherit from the document/theme
     return html`
       <custom-cleaning-popup 
-        robot=${this.robot} 
+        .robot=${this.robot} 
         .areas=${areas} 
         iconColor=${this.iconColor}
         .inline=${true}>
