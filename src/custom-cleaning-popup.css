@@ -146,7 +146,7 @@
     align-items: center;
     justify-content: center;
     gap: 12px;
-    padding: 0px 24px 24px 24px;
+    padding: 5px 24px 24px 24px;
 
     .mwc-button {
       font-size: 150% !important;

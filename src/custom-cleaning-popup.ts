@@ -82,22 +82,10 @@ export class CustomCleaningPopup extends LitElement {
   protected willUpdate(changedProps: Map<string, any>) {
     super.willUpdate(changedProps);
 
-    // Initialize modes from robot state when robot property changes AND has hass
-    const robotHass = (this.robot as any)?.hass;
-    
-    // Only initialize if robot property actually changed and has hass
-    if ((changedProps.has('robot') || !this.modesInitialized) && this.robot && robotHass) {
-      try {
-        this.activeSuctionMode = this.robot.getSuctionMode();
-        this.activeMopMode = this.robot.getMopMode();
-        this.activeRouteMode = this.robot.getRouteMode();
-        this.modesInitialized = true;
-        
-        // Set defaults based on cleaning mode
-        this.fixModesIfNeeded();
-      } catch (e) {
-        // Keep default values if we can't get them from robot
-      }
+    // Set default modes based on cleaning mode if not initialized yet
+    if (!this.modesInitialized) {
+      this.fixModesIfNeeded();
+      this.modesInitialized = true;
     }
   }
 
@@ -355,10 +343,32 @@ export class CustomCleaningPopup extends LitElement {
   }
 
   private fixModesIfNeeded() {
-    if (!VacuumRobot.isSupportedSuctionMode(this.activeSuctionMode, this.activeCleaningMode))
-      this.activeSuctionMode = this.activeCleaningMode == RoborockCleaningMode.Mop ? RoborockSuctionMode.Off : RoborockSuctionMode.Turbo;
-    if (!VacuumRobot.isSupportedMopMode(this.activeMopMode, this.activeCleaningMode))
-      this.activeMopMode = this.activeCleaningMode == RoborockCleaningMode.Vac ? RoborockMopMode.Off : RoborockMopMode.High;
+    // Set suction mode based on cleaning mode
+    if (this.activeCleaningMode == RoborockCleaningMode.Mop) {
+      this.activeSuctionMode = RoborockSuctionMode.Off;
+    } else if (this.activeCleaningMode == RoborockCleaningMode.Vac) {
+      // For Vac mode, set Max as default if current mode is not supported
+      if (!VacuumRobot.isSupportedSuctionMode(this.activeSuctionMode, this.activeCleaningMode) || 
+          this.activeSuctionMode === RoborockSuctionMode.Off) {
+        this.activeSuctionMode = RoborockSuctionMode.Max;
+      }
+    } else {
+      // For VacAndMop mode, set Turbo as default if current mode is not supported
+      if (!VacuumRobot.isSupportedSuctionMode(this.activeSuctionMode, this.activeCleaningMode) || 
+          this.activeSuctionMode === RoborockSuctionMode.Off) {
+        this.activeSuctionMode = RoborockSuctionMode.Turbo;
+      }
+    }
+
+    // Set mop mode based on cleaning mode
+    if (this.activeCleaningMode == RoborockCleaningMode.Vac) {
+      this.activeMopMode = RoborockMopMode.Off;
+    } else {
+      if (!VacuumRobot.isSupportedMopMode(this.activeMopMode, this.activeCleaningMode) || 
+          this.activeMopMode === RoborockMopMode.Off) {
+        this.activeMopMode = RoborockMopMode.High;
+      }
+    }
 
     // Set route mode based on cleaning mode
     if (this.activeCleaningMode == RoborockCleaningMode.Mop) {
