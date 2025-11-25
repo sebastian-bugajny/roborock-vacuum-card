@@ -74,7 +74,6 @@ export class VacuumRobot {
     }
     const entity = this.hass.states[this.entity_id];
     if (!entity) {
-      console.warn('[VacuumRobot] Entity not found:', this.entity_id);
       return RoborockSuctionMode.Turbo;
     }
     return this.getAttributeValue(entity, 'fan_speed');
@@ -87,7 +86,6 @@ export class VacuumRobot {
     const entityId = this.mop_intensity_entity ?? `select.${this.name}_mop_intensity`;
     const entity = this.hass.states[entityId];
     if (!entity) {
-      console.warn('[VacuumRobot] Mop intensity entity not found:', entityId);
       return RoborockMopMode.High;
     }
     return entity.state as RoborockMopMode;
@@ -100,7 +98,6 @@ export class VacuumRobot {
     const entityId = this.mop_mode_entity ?? `select.${this.name}_mop_mode`;
     const entity = this.hass.states[entityId];
     if (!entity) {
-      console.warn('[VacuumRobot] Mop mode entity not found:', entityId);
       return RoborockRouteMode.Standard;
     }
     return entity.state as RoborockRouteMode;
@@ -108,7 +105,6 @@ export class VacuumRobot {
 
   public callServiceAsync(service: string) {
     if (!this.hass || !this.entity_id) {
-      console.error('[VacuumRobot] Cannot call service: hass or entity_id not set');
       return Promise.reject('Robot not initialized');
     }
 
@@ -116,14 +112,11 @@ export class VacuumRobot {
       entity_id: this.entity_id,
     };
 
-    console.log(`[VacuumRobot] 🚀 Calling vacuum.${service} with:`, JSON.stringify(serviceData, null, 2));
-
     return this.hass.callService('vacuum', service, serviceData);
   }
 
   public startSegmentsCleaningAsync(roborock_area_ids: number[], repeat: number) {
     if (!this.hass || !this.entity_id) {
-      console.error('[VacuumRobot] Cannot start segments cleaning: hass or entity_id not set');
       return Promise.reject('Robot not initialized');
     }
 
@@ -136,14 +129,11 @@ export class VacuumRobot {
       }],
     };
 
-    console.log('[VacuumRobot] 🚀 Calling vacuum.send_command with:', JSON.stringify(serviceData, null, 2));
-
     return this.hass.callService('vacuum', 'send_command', serviceData);
   }
 
   public setSuctionModeAsync(value: RoborockSuctionMode) {
     if (!this.hass || !this.entity_id) {
-      console.error('[VacuumRobot] Cannot set suction mode: hass or entity_id not set');
       return Promise.reject('Robot not initialized');
     }
     return this.hass.callService('vacuum', 'set_fan_speed', {
@@ -154,7 +144,6 @@ export class VacuumRobot {
 
   public setMopModeAsync(value: RoborockMopMode) {
     if (!this.hass || !this.entity_id) {
-      console.error('[VacuumRobot] Cannot set mop mode: hass or entity_id not set');
       return Promise.reject('Robot not initialized');
     }
     const entityId = this.mop_intensity_entity ?? `select.${this.name}_mop_intensity`;
@@ -166,7 +155,6 @@ export class VacuumRobot {
 
   public setRouteModeAsync(value: RoborockRouteMode) {
     if (!this.hass || !this.entity_id) {
-      console.error('[VacuumRobot] Cannot set route mode: hass or entity_id not set');
       return Promise.reject('Robot not initialized');
     }
     const entityId = this.mop_mode_entity ?? `select.${this.name}_mop_mode`;
@@ -182,7 +170,6 @@ export class VacuumRobot {
 
   private getAttributeValue(entity: HassEntity, attribute: string) {
     if (!entity || !entity.attributes) {
-      console.warn('[VacuumRobot] Cannot get attribute, entity or attributes undefined');
       return undefined;
     }
     return entity.attributes[attribute];
