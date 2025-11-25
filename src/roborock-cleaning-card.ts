@@ -28,11 +28,6 @@ export class RoborockCleaningCard extends LitElement {
     this.robot = new VacuumRobot();
   }
 
-  // Disable shadow DOM to inherit CSS variables from parent
-  protected createRenderRoot() {
-    return this;
-  }
-
   connectedCallback() {
     super.connectedCallback();
 
