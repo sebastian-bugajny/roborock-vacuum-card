@@ -82,8 +82,8 @@ export class CustomCleaningPopup extends LitElement {
   protected willUpdate(changedProps: Map<string, any>) {
     super.willUpdate(changedProps);
 
-    // Set default modes based on cleaning mode if not initialized yet
-    if (!this.modesInitialized) {
+    // Set default modes based on cleaning mode if not initialized yet OR if cleaning mode changed
+    if (!this.modesInitialized || changedProps.has('activeCleaningMode')) {
       this.fixModesIfNeeded();
       this.modesInitialized = true;
     }
@@ -347,15 +347,16 @@ export class CustomCleaningPopup extends LitElement {
     if (this.activeCleaningMode == RoborockCleaningMode.Mop) {
       this.activeSuctionMode = RoborockSuctionMode.Off;
     } else if (this.activeCleaningMode == RoborockCleaningMode.Vac) {
-      // For Vac mode, set Max as default if current mode is not supported
-      if (!VacuumRobot.isSupportedSuctionMode(this.activeSuctionMode, this.activeCleaningMode) || 
-          this.activeSuctionMode === RoborockSuctionMode.Off) {
+      // For Vac mode, always default to Max unless user explicitly selected a different mode
+      const validModes = [RoborockSuctionMode.Max, RoborockSuctionMode.MaxPlus, RoborockSuctionMode.Turbo, 
+                          RoborockSuctionMode.Balanced, RoborockSuctionMode.Quiet];
+      if (!validModes.includes(this.activeSuctionMode)) {
         this.activeSuctionMode = RoborockSuctionMode.Max;
       }
     } else {
-      // For VacAndMop mode, set Turbo as default if current mode is not supported
-      if (!VacuumRobot.isSupportedSuctionMode(this.activeSuctionMode, this.activeCleaningMode) || 
-          this.activeSuctionMode === RoborockSuctionMode.Off) {
+      // For VacAndMop mode, always default to Turbo unless user explicitly selected a different mode
+      const validModes = [RoborockSuctionMode.Turbo, RoborockSuctionMode.Balanced, RoborockSuctionMode.Quiet];
+      if (!validModes.includes(this.activeSuctionMode)) {
         this.activeSuctionMode = RoborockSuctionMode.Turbo;
       }
     }
