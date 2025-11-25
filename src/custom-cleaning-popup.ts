@@ -63,6 +63,7 @@ export class CustomCleaningPopup extends LitElement {
 
   connectedCallback() {
     super.connectedCallback();
+    console.log('[custom-cleaning-popup] 🔌 connectedCallback - component created/attached');
 
     this.cleaningModes = [{
       text: localize('mode.vac&mop'),
@@ -77,6 +78,11 @@ export class CustomCleaningPopup extends LitElement {
 
     // Always start with VacAndMop mode
     this.activeCleaningMode = RoborockCleaningMode.VacAndMop;
+  }
+
+  disconnectedCallback() {
+    console.log('[custom-cleaning-popup] 🔌 disconnectedCallback - component destroyed/detached');
+    super.disconnectedCallback();
   }
 
   protected willUpdate(changedProps: Map<string, any>) {
