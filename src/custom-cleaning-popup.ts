@@ -347,36 +347,27 @@ export class CustomCleaningPopup extends LitElement {
     if (this.activeCleaningMode == RoborockCleaningMode.Mop) {
       this.activeSuctionMode = RoborockSuctionMode.Off;
     } else if (this.activeCleaningMode == RoborockCleaningMode.Vac) {
-      // For Vac mode, always default to Max unless user explicitly selected a different mode
-      const validModes = [RoborockSuctionMode.Max, RoborockSuctionMode.MaxPlus, RoborockSuctionMode.Turbo, 
-                          RoborockSuctionMode.Balanced, RoborockSuctionMode.Quiet];
-      if (!validModes.includes(this.activeSuctionMode)) {
-        this.activeSuctionMode = RoborockSuctionMode.Max;
-      }
+      // For Vac mode, always set Max as default
+      this.activeSuctionMode = RoborockSuctionMode.Max;
     } else {
-      // For VacAndMop mode, always default to Turbo unless user explicitly selected a different mode
-      const validModes = [RoborockSuctionMode.Turbo, RoborockSuctionMode.Balanced, RoborockSuctionMode.Quiet];
-      if (!validModes.includes(this.activeSuctionMode)) {
-        this.activeSuctionMode = RoborockSuctionMode.Turbo;
-      }
+      // For VacAndMop mode, always set Turbo as default
+      this.activeSuctionMode = RoborockSuctionMode.Turbo;
     }
 
     // Set mop mode based on cleaning mode
     if (this.activeCleaningMode == RoborockCleaningMode.Vac) {
       this.activeMopMode = RoborockMopMode.Off;
     } else {
-      if (!VacuumRobot.isSupportedMopMode(this.activeMopMode, this.activeCleaningMode) || 
-          this.activeMopMode === RoborockMopMode.Off) {
-        this.activeMopMode = RoborockMopMode.High;
-      }
+      // For VacAndMop and Mop modes, set High as default
+      this.activeMopMode = RoborockMopMode.High;
     }
 
     // Set route mode based on cleaning mode
     if (this.activeCleaningMode == RoborockCleaningMode.Mop) {
       // For Mop mode, always set Deep as default
       this.activeRouteMode = RoborockRouteMode.Deep;
-    } else if (!VacuumRobot.isSupportedRouteMode(this.activeRouteMode, this.activeCleaningMode)) {
-      // For other modes, only change if current route is not supported
+    } else {
+      // For other modes, set Standard as default
       this.activeRouteMode = RoborockRouteMode.Standard;
     }
   }
