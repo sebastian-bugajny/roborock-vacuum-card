@@ -75,18 +75,18 @@ export class CustomCleaningPopup extends LitElement {
       value: RoborockCleaningMode.Vac
     }];
 
-    // Always start with VacAndMop mode
+    // Always start with VacAndMop mode and set appropriate defaults
     this.activeCleaningMode = RoborockCleaningMode.VacAndMop;
+    this.activeSuctionMode = RoborockSuctionMode.Turbo;
+    this.activeMopMode = RoborockMopMode.High;
+    this.activeRouteMode = RoborockRouteMode.Standard;
+    this.modesInitialized = true;
   }
 
   protected willUpdate(changedProps: Map<string, any>) {
     super.willUpdate(changedProps);
 
-    // Set default modes based on cleaning mode if not initialized yet OR if cleaning mode changed
-    if (!this.modesInitialized || changedProps.has('activeCleaningMode')) {
-      this.fixModesIfNeeded();
-      this.modesInitialized = true;
-    }
+    // This will be called when cleaning mode changes via onCleaningModeChange
   }
 
   private onCleaningModeChange(e: StringEvent) {
