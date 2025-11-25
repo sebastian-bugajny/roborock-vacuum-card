@@ -96,13 +96,13 @@ export class VacuumRobot {
       console.error('[VacuumRobot] Cannot call service: hass or entity_id not set');
       return Promise.reject('Robot not initialized');
     }
-    
+
     const serviceData = {
       entity_id: this.entity_id,
     };
-    
+
     console.log(`[VacuumRobot] 🚀 Calling vacuum.${service} with:`, JSON.stringify(serviceData, null, 2));
-    
+
     return this.hass.callService('vacuum', service, serviceData);
   }
 
@@ -111,7 +111,7 @@ export class VacuumRobot {
       console.error('[VacuumRobot] Cannot start segments cleaning: hass or entity_id not set');
       return Promise.reject('Robot not initialized');
     }
-    
+
     const serviceData = {
       entity_id: this.entity_id,
       command: 'app_segment_clean',
@@ -120,9 +120,9 @@ export class VacuumRobot {
         repeat: repeat,
       }],
     };
-    
+
     console.log('[VacuumRobot] 🚀 Calling vacuum.send_command with:', JSON.stringify(serviceData, null, 2));
-    
+
     return this.hass.callService('vacuum', 'send_command', serviceData);
   }
 
