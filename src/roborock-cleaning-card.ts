@@ -81,12 +81,12 @@ export class RoborockCleaningCard extends LitElement {
     console.log('  mop_mode_entity:', config.mop_mode_entity);
   }
 
-  protected updated(changedProps: Map<string, any>): void {
-    super.updated(changedProps);
+  protected willUpdate(changedProps: Map<string, any>): void {
+    super.willUpdate(changedProps);
 
     if (changedProps.has('hass') && this.hass) {
       console.log('[roborock-cleaning-card] hass updated, setting on robot');
-      this.robot?.setHass(this.hass as any);
+      this.robot.setHass(this.hass as any);
     }
   }
 
@@ -97,7 +97,7 @@ export class RoborockCleaningCard extends LitElement {
 
     console.log('[roborock-cleaning-card] render called, robot:', this.robot);
     console.log('[roborock-cleaning-card] robot has hass:', !!this.robot?.['hass']);
-    
+
     // Verify robot has all required data before rendering popup
     const robotHass = (this.robot as any).hass;
     const robotEntityId = (this.robot as any).entity_id;
@@ -151,7 +151,7 @@ export class RoborockCleaningCard extends LitElement {
         area_id: normalizedAreaId,
         roborock_area_id,
       };
-      
+
       console.log('[roborock-cleaning-card] Adding area:', processedArea);
       areas.push(processedArea);
     }
