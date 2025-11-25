@@ -84,26 +84,31 @@ export class CustomCleaningPopup extends LitElement {
 
     console.log('[custom-cleaning-popup] willUpdate, robot:', this.robot);
     console.log('[custom-cleaning-popup] modesInitialized:', this.modesInitialized);
+    console.log('[custom-cleaning-popup] changedProps.has(robot):', changedProps.has('robot'));
 
-    // Initialize modes from robot state when robot becomes available AND has hass
+    // Initialize modes from robot state when robot property changes AND has hass
     const robotHass = (this.robot as any)?.hass;
     console.log('[custom-cleaning-popup] robot.hass available:', !!robotHass);
     
-    if (!this.modesInitialized && this.robot && robotHass) {
+    // Only initialize if robot property actually changed and has hass
+    if ((changedProps.has('robot') || !this.modesInitialized) && this.robot && robotHass) {
       try {
         console.log('[custom-cleaning-popup] Attempting to initialize modes');
         this.activeSuctionMode = this.robot.getSuctionMode();
         this.activeMopMode = this.robot.getMopMode();
         this.activeRouteMode = this.robot.getRouteMode();
         this.modesInitialized = true;
-        console.log('[custom-cleaning-popup] Modes initialized from robot');
+        console.log('[custom-cleaning-popup] ✅ Modes initialized from robot');
+        console.log('[custom-cleaning-popup] - Suction:', this.activeSuctionMode);
+        console.log('[custom-cleaning-popup] - Mop:', this.activeMopMode);
+        console.log('[custom-cleaning-popup] - Route:', this.activeRouteMode);
+        
+        // Set defaults based on cleaning mode
+        this.fixModesIfNeeded();
       } catch (e) {
         console.warn('[custom-cleaning-popup] Could not get initial modes from robot, using defaults', e);
         // Keep default values if we can't get them from robot
       }
-
-      // Set defaults based on cleaning mode
-      this.fixModesIfNeeded();
     }
   }
 
