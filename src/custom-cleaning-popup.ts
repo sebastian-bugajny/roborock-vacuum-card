@@ -126,8 +126,6 @@ export class CustomCleaningPopup extends LitElement {
     this.popupRequestInProgress = true;
 
     try {
-      this.fixModesIfNeeded();
-      
       await this.robot.setSuctionModeAsync(this.activeSuctionMode as RoborockSuctionMode);
       await new Promise(r => setTimeout(r, delay));
 
@@ -154,7 +152,6 @@ export class CustomCleaningPopup extends LitElement {
     this.popupRequestInProgress = true;
 
     try {
-      this.fixModesIfNeeded();
       await this.robot.setSuctionModeAsync(this.activeSuctionMode as RoborockSuctionMode);
       await new Promise(r => setTimeout(r, delay));
 
