@@ -95,6 +95,11 @@ export class RoborockCleaningCard extends LitElement {
       return nothing;
     }
 
+    // Ensure robot has hass before rendering
+    if (this.robot && this.hass) {
+      this.robot.setHass(this.hass as any);
+    }
+
     console.log('[roborock-cleaning-card] render called, robot:', this.robot);
     console.log('[roborock-cleaning-card] robot has hass:', !!this.robot?.['hass']);
 
