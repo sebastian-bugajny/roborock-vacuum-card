@@ -85,8 +85,11 @@ export class CustomCleaningPopup extends LitElement {
     console.log('[custom-cleaning-popup] willUpdate, robot:', this.robot);
     console.log('[custom-cleaning-popup] modesInitialized:', this.modesInitialized);
 
-    // Initialize modes from robot state when robot becomes available
-    if (!this.modesInitialized && this.robot) {
+    // Initialize modes from robot state when robot becomes available AND has hass
+    const robotHass = (this.robot as any)?.hass;
+    console.log('[custom-cleaning-popup] robot.hass available:', !!robotHass);
+    
+    if (!this.modesInitialized && this.robot && robotHass) {
       try {
         console.log('[custom-cleaning-popup] Attempting to initialize modes');
         this.activeSuctionMode = this.robot.getSuctionMode();
