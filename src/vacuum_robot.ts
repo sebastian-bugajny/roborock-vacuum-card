@@ -72,7 +72,12 @@ export class VacuumRobot {
     if (!this.hass || !this.entity_id) {
       return RoborockSuctionMode.Turbo; // Default value
     }
-    return this.getAttributeValue(this.hass.states[this.entity_id], 'fan_speed');
+    const entity = this.hass.states[this.entity_id];
+    if (!entity) {
+      console.warn('[VacuumRobot] Entity not found:', this.entity_id);
+      return RoborockSuctionMode.Turbo;
+    }
+    return this.getAttributeValue(entity, 'fan_speed');
   }
 
   public getMopMode(): RoborockMopMode {
@@ -80,7 +85,12 @@ export class VacuumRobot {
       return RoborockMopMode.High; // Default value
     }
     const entityId = this.mop_intensity_entity ?? `select.${this.name}_mop_intensity`;
-    return this.state(entityId);
+    const entity = this.hass.states[entityId];
+    if (!entity) {
+      console.warn('[VacuumRobot] Mop intensity entity not found:', entityId);
+      return RoborockMopMode.High;
+    }
+    return entity.state as RoborockMopMode;
   }
 
   public getRouteMode(): RoborockRouteMode {
@@ -88,7 +98,12 @@ export class VacuumRobot {
       return RoborockRouteMode.Standard; // Default value
     }
     const entityId = this.mop_mode_entity ?? `select.${this.name}_mop_mode`;
-    return this.state(entityId);
+    const entity = this.hass.states[entityId];
+    if (!entity) {
+      console.warn('[VacuumRobot] Mop mode entity not found:', entityId);
+      return RoborockRouteMode.Standard;
+    }
+    return entity.state as RoborockRouteMode;
   }
 
   public callServiceAsync(service: string) {
@@ -166,6 +181,10 @@ export class VacuumRobot {
   }
 
   private getAttributeValue(entity: HassEntity, attribute: string) {
+    if (!entity || !entity.attributes) {
+      console.warn('[VacuumRobot] Cannot get attribute, entity or attributes undefined');
+      return undefined;
+    }
     return entity.attributes[attribute];
   }
 }
