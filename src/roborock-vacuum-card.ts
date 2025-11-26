@@ -16,6 +16,7 @@ import {
   HassEntity,
   RoborockSuctionMode,
   RoborockMopMode,
+  RoborockRouteMode,
 } from './types'
 import { formatTime, formatTimeAsMinutesSeconds, formatMinutesAsMinutesSeconds } from './format'
 import { getSuctionIcon, getMoppingIcon as getMopIcon, getRouteIcon } from './resorces'
@@ -348,11 +349,14 @@ export class RoborockVacuumCard extends LitElement {
       mop = this.robot.getMopMode(),
       route = this.robot.getRouteMode();
 
-    // Determine cleaning mode based on suction level:
-    // - suction = off => Mop only (don't show suction, show mop)
-    // - suction = max_plus => Vac only (show suction, don't show mop)
-    // - other => VacAndMop (show both)
-    const isMopOnly = suction === RoborockSuctionMode.Off;
+    // Determine cleaning mode based on suction and route:
+    // - suction = off => Mop only
+    // - route = deep/deep_plus => Mop only (these routes are only for mopping)
+    // - suction = max_plus => Vac only (max_plus is only available for vacuum-only)
+    // - other combinations => VacAndMop
+    const isMopOnly = suction === RoborockSuctionMode.Off || 
+                      route === RoborockRouteMode.Deep || 
+                      route === RoborockRouteMode.DeepPlus;
     const isVacOnly = suction === RoborockSuctionMode.MaxPlus;
 
     // Show suction icon if not in Mop-only mode
@@ -403,23 +407,15 @@ export class RoborockVacuumCard extends LitElement {
   }
 
   private renderBattery(): Template {
-    console.log('[Battery] Looking for sensor:', this.sensor.battery);
-    console.log('[Battery] Config sensors:', this.config.sensors);
-    console.log('[Battery] Available states:', Object.keys(this.hass.states).filter(k => k.includes('bateria')));
-
     const entity = this.hass.states[this.sensor.battery];
-    console.log('[Battery] Found entity:', entity);
 
     if (!entity) {
-      console.warn('[Battery] Entity not found!');
       return html``;
     }
 
     const n = Number(entity.state);
     const value = Number.isFinite(n) ? Math.round(n) : entity.state;
     const unit = entity.attributes.unit_of_measurement || (Number.isFinite(n) ? '%' : '');
-
-    console.log('[Battery] Rendering battery:', value, unit);
 
     return html`
     <div class="tip" @click="${() => this.handleMore(this.sensor.battery)}">
