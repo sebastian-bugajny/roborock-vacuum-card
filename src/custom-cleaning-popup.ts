@@ -126,6 +126,9 @@ export class CustomCleaningPopup extends LitElement {
     this.popupRequestInProgress = true;
 
     try {
+      // Save cleaning mode to localStorage
+      localStorage.setItem('roborock_last_cleaning_mode', this.activeCleaningMode);
+      
       await this.robot.setSuctionModeAsync(this.activeSuctionMode as RoborockSuctionMode);
       await new Promise(r => setTimeout(r, delay));
 
