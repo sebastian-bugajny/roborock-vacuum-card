@@ -348,9 +348,10 @@ export class RoborockVacuumCard extends LitElement {
       mop = this.robot.getMopMode(),
       route = this.robot.getRouteMode();
 
-    // Debug: Check vacuum attributes for mop status
-    const vacuumEntity = this.hass.states[this.config.entity];
-    console.log("[Mode] Vacuum attributes:", vacuumEntity?.attributes);
+    // Debug: Check mop mode entity
+    const mopModeEntityId = this.config.mop_mode_entity ?? `select.${this.name}_mop_mode`;
+    const mopModeEntity = this.hass.states[mopModeEntityId];
+    console.log("[Mode] Mop mode entity:", mopModeEntityId, mopModeEntity?.state, mopModeEntity?.attributes);
     console.log("[Mode] Suction:", suction, "| Mop:", mop, "| Route:", route);
 
     // Show suction icon only if not in Mop-only mode
