@@ -45,6 +45,7 @@ export default function buildConfig(
     mop_intensity_entity: config.mop_intensity_entity,
     mop_mode_entity: config.mop_mode_entity,
     show_custom_cleaning_inline: config.show_custom_cleaning_inline ?? false,
+    show_roborock_icon: config.show_roborock_icon ?? false,
     sensors: config.sensors,
   };
 }
