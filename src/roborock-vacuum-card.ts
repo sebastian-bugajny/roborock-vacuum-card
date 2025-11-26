@@ -391,14 +391,23 @@ export class RoborockVacuumCard extends LitElement {
   }
 
   private renderBattery(): Template {
+    console.log('[Battery] Looking for sensor:', this.sensor.battery);
+    console.log('[Battery] Config sensors:', this.config.sensors);
+    console.log('[Battery] Available states:', Object.keys(this.hass.states).filter(k => k.includes('bateria')));
+    
     const entity = this.hass.states[this.sensor.battery];
+    console.log('[Battery] Found entity:', entity);
 
-    if (!entity)
+    if (!entity) {
+      console.warn('[Battery] Entity not found!');
       return html``;
+    }
 
     const n = Number(entity.state);
     const value = Number.isFinite(n) ? Math.round(n) : entity.state;
     const unit = entity.attributes.unit_of_measurement || (Number.isFinite(n) ? '%' : '');
+
+    console.log('[Battery] Rendering battery:', value, unit);
 
     return html`
     <div class="tip" @click="${() => this.handleMore(this.sensor.battery)}">
