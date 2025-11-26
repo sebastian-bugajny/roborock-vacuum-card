@@ -348,10 +348,15 @@ export class RoborockVacuumCard extends LitElement {
       mop = this.robot.getMopMode(),
       route = this.robot.getRouteMode();
 
+    // Show suction icon only if not in Mop-only mode
     if (suction != RoborockSuctionMode.Off)
       icons.push(getSuctionIcon(suction, 24, this.iconColor));
+    
+    // Show mop icon only if not in Vac-only mode  
     if (mop != RoborockMopMode.Off)
       icons.push(getMopIcon(mop, 24, this.iconColor));
+    
+    // Always show route icon
     icons.push(getRouteIcon(route, 24, this.iconColor));
 
     const result = icons.map(icon => html`<div class="tip">${icon}</div>`)
