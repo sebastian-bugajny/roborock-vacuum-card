@@ -59,7 +59,7 @@ export class RoborockVacuumCard extends LitElement {
       vacuumError: `sensor.${name}_vacuum_error`,
       dockError: `sensor.${name}_dock_error`,
     };
-    
+
     // Merge with custom sensor IDs from config
     return { ...defaults, ...(this.config?.sensors || {}) };
   }
@@ -378,7 +378,7 @@ export class RoborockVacuumCard extends LitElement {
 
     const timeValue = Number(mopDryingTimeEntity.state);
     const unit = mopDryingTimeEntity.attributes.unit_of_measurement;
-    
+
     // Convert to seconds if needed
     const timeInSeconds = unit === 'min' || unit === 'minutes' ? timeValue * 60 : timeValue;
 
@@ -394,7 +394,7 @@ export class RoborockVacuumCard extends LitElement {
     console.log('[Battery] Looking for sensor:', this.sensor.battery);
     console.log('[Battery] Config sensors:', this.config.sensors);
     console.log('[Battery] Available states:', Object.keys(this.hass.states).filter(k => k.includes('bateria')));
-    
+
     const entity = this.hass.states[this.sensor.battery];
     console.log('[Battery] Found entity:', entity);
 
