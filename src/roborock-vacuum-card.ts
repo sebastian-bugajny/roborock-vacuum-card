@@ -116,6 +116,7 @@ export class RoborockVacuumCard extends LitElement {
     const state = this.state(this.config.entity);
     const combinedState = this.renderState(state);
     const errors = this.renderErrors();
+    const roborockIcon = this.renderRoborockIcon();
     const name = this.renderName();
     const mode = this.renderMode();
     const mopDrying = this.renderMopDrying();
@@ -134,6 +135,7 @@ export class RoborockVacuumCard extends LitElement {
           ${battery}
         </div>
         <div class="content" @click=${this.config.show_custom_cleaning_inline ? null : this.onPopupShow}>
+          ${roborockIcon}
           ${errors}
           <div class="state">
             ${combinedState}
@@ -157,6 +159,20 @@ export class RoborockVacuumCard extends LitElement {
     return state == reachState
       ? localize(`status.${state}`)
       : localize(`status.${state}`) + '. ' + localize(`reach_status.${reachState}`) + '.';
+  }
+
+  private renderRoborockIcon(): Template {
+    if (!this.config.show_roborock_icon) {
+      return nothing;
+    }
+
+    const iconUrl = '/local/roborock-vacuum-card/images/roborock-vacuum.png';
+    
+    return html`
+      <div class="roborock-icon">
+        <img src="${iconUrl}" alt="Roborock" />
+      </div>
+    `;
   }
 
   private renderPopup(): Template {

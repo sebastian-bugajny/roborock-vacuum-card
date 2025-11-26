@@ -107,6 +107,7 @@ export interface RoborockVacuumCardConfig {
   mop_intensity_entity?: string;
   mop_mode_entity?: string;
   show_custom_cleaning_inline?: boolean;
+  show_roborock_icon?: boolean;
   sensors?: Partial<RoborockSensorIds>;
 }
 
