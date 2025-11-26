@@ -372,12 +372,20 @@ export class RoborockVacuumCard extends LitElement {
     if (isDrying != 'on')
       return nothing;
 
-    const timeLeft = Number(this.hass.states[this.sensor.mopDryingRemainingTime].state);
+    const mopDryingTimeEntity = this.hass.states[this.sensor.mopDryingRemainingTime];
+    if (!mopDryingTimeEntity)
+      return nothing;
+
+    const timeValue = Number(mopDryingTimeEntity.state);
+    const unit = mopDryingTimeEntity.attributes.unit_of_measurement;
+    
+    // Convert to seconds if needed
+    const timeInSeconds = unit === 'min' || unit === 'minutes' ? timeValue * 60 : timeValue;
 
     return html`
       <div class="tip" @click="${() => this.handleMore(this.sensor.mopDryingRemainingTime)}">
         <ha-icon icon="mdi:heat-wave"></ha-icon>
-        <span class="icon-title">${formatTime(timeLeft)}</span>
+        <span class="icon-title">${formatTime(timeInSeconds)}</span>
       </div>
     `;
   }
