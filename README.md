@@ -42,53 +42,42 @@ entity: vacuum.robot
 #   cleaning: binary_sensor.robot_cleaning
 stats:
   default:
-    - entity: sensor.robot_filter_time_left
-      divide_by: 3600
-      scale: 1
-      title: Filter
+    - entity: sensor.robot_pozostal_czas_filtrowania
+      scale: 0
+      title: Filtr
       unit: h
-    - entity: sensor.robot_side_brush_time_left
-      divide_by: 3600
-      scale: 1
-      title: Side brush
+    - entity: sensor.robot_pozostal_czas_szczotki_bocznej
+      scale: 0
+      title: Szczotka boczna
       unit: h
-    - entity: sensor.robot_main_brush_time_left
-      divide_by: 3600
-      scale: 1
+    - entity: sensor.robot_pozostal_czas_szczotki_glownej
+      scale: 0
       unit: h
-      title: Main brush
-    - entity: sensor.robot_sensor_time_left
-      divide_by: 3600
-      scale: 1
+      title: Szczotka główna
+    - entity: sensor.robot_pozostal_czas_sensora
+      scale: 0
       unit: h
-      title: Sensors
+      title: Sensory
   cleaning:
     - entity: sensor.robot_cleaning_progress
-      title: Cleaning progress
-      unit: '%'
-    - entity: sensor.robot_current_root
-      title: Current room
-    - entity: sensor.robot_cleaning_time
+      title: Postęp czyszczenia
+      unit: "%"
+    - entity: sensor.robot_current_room
+      title: Czyszczone pomieszczenie
+    - entity: sensor.robot_czas_czyszczenia
       format: minutes_to_minutes_seconds
-      title: Cleaning time
+      title: Czas sprzątania
       unit: min
 areas:
-  - area_id: living_room
-    roborock_area_id: 12
-  - area_id: master_bedroom
-    roborock_area_id: 13
-  - area_id: kids_bedroom
-    roborock_area_id: 14
-  - area_id: kitchen
-    roborock_area_id: 15
-  - area_id: bathroom
-    roborock_area_id: 16
-  - area_id: toilet
-    roborock_area_id: 17
-  - area_id: corridor
-    roborock_area_id: 18
-  - area_id: hallway
-    roborock_area_id: 19
+  - area_id: jadalnia
+    roborock_area_id: 3
+  - area_id: kuchnia
+    roborock_area_id: 4
+  - area_id: przedpokoj
+    roborock_area_id: 2
+  - area_id: salon
+    roborock_area_id: 1
+
 ```
 
 ### Configuration Options
