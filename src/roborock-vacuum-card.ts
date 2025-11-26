@@ -349,15 +349,28 @@ export class RoborockVacuumCard extends LitElement {
       mop = this.robot.getMopMode(),
       route = this.robot.getRouteMode();
 
-    // Determine cleaning mode based on suction and route:
-    // - suction = off => Mop only
-    // - route = deep/deep_plus => Mop only (these routes are only for mopping)
-    // - suction = max_plus => Vac only (max_plus is only available for vacuum-only)
-    // - other combinations => VacAndMop
-    const isMopOnly = suction === RoborockSuctionMode.Off || 
-                      route === RoborockRouteMode.Deep || 
-                      route === RoborockRouteMode.DeepPlus;
-    const isVacOnly = suction === RoborockSuctionMode.MaxPlus;
+    // Get last cleaning mode from localStorage
+    const lastCleaningMode = localStorage.getItem('roborock_last_cleaning_mode');
+    
+    // Determine cleaning mode:
+    // 1. If we have saved mode from last cleaning, use it
+    // 2. Otherwise fall back to detection based on suction/route values
+    let isMopOnly = false;
+    let isVacOnly = false;
+    
+    if (lastCleaningMode === 'mop') {
+      isMopOnly = true;
+    } else if (lastCleaningMode === 'vac') {
+      isVacOnly = true;
+    } else {
+      // Fallback detection when no saved mode available
+      isMopOnly = suction === RoborockSuctionMode.Off || 
+                  route === RoborockRouteMode.Deep || 
+                  route === RoborockRouteMode.DeepPlus;
+      isVacOnly = suction === RoborockSuctionMode.MaxPlus;
+    }
+
+    console.log('[renderMode] suction:', suction, '| mop:', mop, '| route:', route, '| lastMode:', lastCleaningMode, '| isMopOnly:', isMopOnly, '| isVacOnly:', isVacOnly);
 
     // Show suction icon if not in Mop-only mode
     if (!isMopOnly)
