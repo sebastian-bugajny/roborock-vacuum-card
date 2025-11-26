@@ -32,6 +32,14 @@ entity: vacuum.robot
 # mop_mode_entity: select.robot_tryb_mopa
 # Optional: Show custom cleaning panel inline instead of as a popup (default: false)
 # show_custom_cleaning_inline: true
+# Optional: Override default sensor entity IDs (useful for non-English integrations)
+# sensors:
+#   battery: sensor.robot_bateria
+#   vacuumError: sensor.robot_blad_odkurzacza
+#   dockError: sensor.robot_dock_dock_error
+#   mopDrying: binary_sensor.robot_dock_mop_drying
+#   mopDryingRemainingTime: sensor.robot_dock_mop_drying_remaining_time
+#   cleaning: binary_sensor.robot_cleaning
 stats:
   default:
     - entity: sensor.robot_filter_time_left
@@ -85,6 +93,25 @@ areas:
 
 ### Configuration Options
 
+#### `entity`
+- **Type:** `string`
+- **Required:** `true`
+- **Description:** The vacuum entity ID (e.g., `vacuum.saros_10r`)
+
+#### `mop_intensity_entity`
+- **Type:** `string`
+- **Optional**
+- **Description:** Custom entity ID for mop intensity control. Useful for non-English integrations where entity names differ from defaults.
+- **Default:** `select.{robot_name}_mop_intensity`
+- **Example:** `select.saros_10r_intensywnosc_mopa`
+
+#### `mop_mode_entity`
+- **Type:** `string`
+- **Optional**
+- **Description:** Custom entity ID for mop mode control. Useful for non-English integrations where entity names differ from defaults.
+- **Default:** `select.{robot_name}_mop_mode`
+- **Example:** `select.saros_10r_tryb_mopa`
+
 #### `show_custom_cleaning_inline`
 - **Type:** `boolean`
 - **Default:** `false`
@@ -98,6 +125,50 @@ show_custom_cleaning_inline: true
 areas:
   - area_id: salon
     roborock_area_id: 1
+```
+
+#### `sensors`
+- **Type:** `object`
+- **Optional**
+- **Description:** Override default sensor entity IDs. Useful for non-English integrations where sensor names differ from the English defaults.
+
+**Available sensor overrides:**
+- `battery` - Battery level sensor (default: `sensor.{robot_name}_battery`)
+- `vacuumError` - Vacuum error sensor (default: `sensor.{robot_name}_vacuum_error`)
+  - Expected states: `none` = no error, other values = error description
+- `dockError` - Dock error sensor (default: `sensor.{robot_name}_dock_error`)
+  - Expected states: `ok` = no error, other values = error description
+- `mopDrying` - Mop drying status sensor (default: `binary_sensor.{robot_name}_dock_mop_drying`)
+- `mopDryingRemainingTime` - Remaining mop drying time (default: `sensor.{robot_name}_dock_mop_drying_remaining_time`)
+- `cleaning` - Cleaning status sensor (default: `binary_sensor.{robot_name}_cleaning`)
+
+**Example for Polish integration:**
+```yaml
+type: custom:roborock-vacuum-card
+entity: vacuum.saros_10r
+sensors:
+  battery: sensor.saros_10r_bateria
+  vacuumError: sensor.saros_10r_blad_odkurzacza
+  dockError: sensor.saros_10r_dock_dock_error
+areas:
+  - area_id: salon
+    roborock_area_id: 1
+```
+
+#### `areas`
+- **Type:** `array`
+- **Optional**
+- **Description:** List of rooms/areas available for custom cleaning. Each area requires:
+  - `area_id` - Home Assistant area identifier
+  - `roborock_area_id` - Internal Roborock area ID (numeric)
+
+**Example:**
+```yaml
+areas:
+  - area_id: living_room
+    roborock_area_id: 1
+  - area_id: kitchen
+    roborock_area_id: 2
 ```
 
 ### Stats Configuration Options
