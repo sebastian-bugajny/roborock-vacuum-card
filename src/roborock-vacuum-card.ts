@@ -348,18 +348,19 @@ export class RoborockVacuumCard extends LitElement {
       mop = this.robot.getMopMode(),
       route = this.robot.getRouteMode();
 
-    // Debug: Check mop mode entity
-    const mopModeEntityId = this.config.mop_mode_entity ?? `select.${this.name}_mop_mode`;
-    const mopModeEntity = this.hass.states[mopModeEntityId];
-    console.log("[Mode] Mop mode entity:", mopModeEntityId, mopModeEntity?.state, mopModeEntity?.attributes);
-    console.log("[Mode] Suction:", suction, "| Mop:", mop, "| Route:", route);
+    // Determine cleaning mode based on suction level:
+    // - suction = off => Mop only (don't show suction, show mop)
+    // - suction = max_plus => Vac only (show suction, don't show mop)
+    // - other => VacAndMop (show both)
+    const isMopOnly = suction === RoborockSuctionMode.Off;
+    const isVacOnly = suction === RoborockSuctionMode.MaxPlus;
 
-    // Show suction icon only if not in Mop-only mode
-    if (suction != RoborockSuctionMode.Off)
+    // Show suction icon if not in Mop-only mode
+    if (!isMopOnly)
       icons.push(getSuctionIcon(suction, 24, this.iconColor));
     
-    // Show mop icon only if not in Vac-only mode  
-    if (mop != RoborockMopMode.Off)
+    // Show mop icon if not in Vac-only mode  
+    if (!isVacOnly && mop != RoborockMopMode.Off)
       icons.push(getMopIcon(mop, 24, this.iconColor));
     
     // Always show route icon
