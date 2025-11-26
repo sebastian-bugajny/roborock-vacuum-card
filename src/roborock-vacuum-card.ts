@@ -22,6 +22,7 @@ import { formatTime, formatTimeAsMinutesSeconds, formatMinutesAsMinutesSeconds }
 import { getSuctionIcon, getMoppingIcon as getMopIcon, getRouteIcon } from './resorces'
 import { CustomCleaningPopup } from './custom-cleaning-popup'
 import { RoborockCleaningCard } from './roborock-cleaning-card'
+import { ROBOROCK_ICON_BASE64 } from './roborock-icon'
 
 typeof (CustomCleaningPopup);
 typeof (RoborockCleaningCard);
@@ -165,13 +166,10 @@ export class RoborockVacuumCard extends LitElement {
     if (!this.config.show_roborock_icon) {
       return nothing;
     }
-
-    // Try HACS path first, fallback to manual installation path
-    const iconUrl = '/hacsfiles/roborock-vacuum-card/images/roborock-vacuum.png';
     
     return html`
       <div class="roborock-icon">
-        <img src="${iconUrl}" alt="Roborock" />
+        <img src="${ROBOROCK_ICON_BASE64}" alt="Roborock" />
       </div>
     `;
   }
