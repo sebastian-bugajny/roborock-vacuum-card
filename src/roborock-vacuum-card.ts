@@ -166,7 +166,8 @@ export class RoborockVacuumCard extends LitElement {
       return nothing;
     }
 
-    const iconUrl = '/local/roborock-vacuum-card/images/roborock-vacuum.png';
+    // Try HACS path first, fallback to manual installation path
+    const iconUrl = '/hacsfiles/roborock-vacuum-card/images/roborock-vacuum.png';
     
     return html`
       <div class="roborock-icon">
