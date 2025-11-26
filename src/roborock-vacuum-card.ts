@@ -61,7 +61,7 @@ export class RoborockVacuumCard extends LitElement {
     };
     
     // Merge with custom sensor IDs from config
-    return { ...defaults, ...this.config.sensors };
+    return { ...defaults, ...(this.config?.sensors || {}) };
   }
 
   static get styles(): CSSResultGroup {
