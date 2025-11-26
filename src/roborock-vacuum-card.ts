@@ -51,12 +51,17 @@ export class RoborockVacuumCard extends LitElement {
 
   get sensor(): RoborockSensorIds {
     const name = this.name;
-    return {
+    const defaults = {
       cleaning: `binary_sensor.${name}_cleaning`,
-      mopDrying: `binary_sensor.${name}_mop_drying`,
-      mopDryingRemainingTime: `sensor.${name}_mop_drying_remaining_time`,
+      mopDrying: `binary_sensor.${name}_dock_mop_drying`,
+      mopDryingRemainingTime: `sensor.${name}_dock_mop_drying_remaining_time`,
       battery: `sensor.${name}_battery`,
+      vacuumError: `sensor.${name}_vacuum_error`,
+      dockError: `sensor.${name}_dock_error`,
     };
+    
+    // Merge with custom sensor IDs from config
+    return { ...defaults, ...this.config.sensors };
   }
 
   static get styles(): CSSResultGroup {
@@ -179,15 +184,16 @@ export class RoborockVacuumCard extends LitElement {
     if (!this.hass || !this.config)
       return nothing;
 
-    const vacuumErrorSensor = this._getExistingSensorId([`sensor.${this.name}_vacuum_error`, `sensor.${this.name}_current_error`]),
-      docErrorSensor = this._getExistingSensorId([`sensor.${this.name}_dock_error`]);
+    const vacuumErrorSensor = this.sensor.vacuumError;
+    const dockErrorSensor = this.sensor.dockError;
 
     let isVacuumError = false;
     let vacuum: Template = nothing;
-    if (vacuumErrorSensor) {
-      const rawVacuumError = this.state(vacuumErrorSensor),
-        vacuumError = `vacuum_error.${rawVacuumError}`;
+    if (vacuumErrorSensor && this.hass.states[vacuumErrorSensor]) {
+      const rawVacuumError = this.state(vacuumErrorSensor);
+      const vacuumError = `vacuum_error.${rawVacuumError}`;
 
+      // vacuum_error: 'none' means no error
       isVacuumError = rawVacuumError != "none";
       if (isVacuumError)
         vacuum = html`<div>${localize('common.vacuum_error')}: ${localize(vacuumError)}.</div>`;
@@ -195,10 +201,11 @@ export class RoborockVacuumCard extends LitElement {
 
     let isDocError = false;
     let doc: Template = nothing;
-    if (docErrorSensor) {
-      const rawDocError = this.state(docErrorSensor),
-        docError = `doc_error.${rawDocError}`;
+    if (dockErrorSensor && this.hass.states[dockErrorSensor]) {
+      const rawDocError = this.state(dockErrorSensor);
+      const docError = `doc_error.${rawDocError}`;
 
+      // dock_error: 'ok' means no error
       isDocError = rawDocError != 'ok';
       if (isDocError)
         doc = html`<div>${localize('common.doc_error')}: ${localize(docError)}.</div>`;

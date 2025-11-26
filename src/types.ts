@@ -107,6 +107,7 @@ export interface RoborockVacuumCardConfig {
   mop_intensity_entity?: string;
   mop_mode_entity?: string;
   show_custom_cleaning_inline?: boolean;
+  sensors?: Partial<RoborockSensorIds>;
 }
 
 export interface RoborockCleaningCardConfig {
@@ -123,4 +124,6 @@ export interface RoborockSensorIds {
   mopDrying: string;
   mopDryingRemainingTime: string;
   battery: string;
+  vacuumError?: string;
+  dockError?: string;
 }
