@@ -117,7 +117,7 @@ export class RoborockVacuumCard extends LitElement {
     const state = this.state(this.config.entity);
     const combinedState = this.renderState(state);
     const errors = this.renderErrors();
-    const roborockIcon = this.renderRoborockIcon();
+    const roborockIcon = this.renderRoborockIcon(isCleaning);
     const name = this.renderName();
     const mode = this.renderMode();
     const mopDrying = this.renderMopDrying();
@@ -162,14 +162,40 @@ export class RoborockVacuumCard extends LitElement {
       : localize(`status.${state}`) + '. ' + localize(`reach_status.${reachState}`) + '.';
   }
 
-  private renderRoborockIcon(): Template {
+  private renderRoborockIcon(isCleaning: boolean): Template {
     if (!this.config.show_roborock_icon) {
       return nothing;
     }
     
     return html`
-      <div class="roborock-icon">
-        <img src="${ROBOROCK_ICON_BASE64}" alt="Roborock" />
+      <div class="roborock-icon ${isCleaning ? 'cleaning' : ''}">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="100" height="100">
+          <!-- Main robot body -->
+          <circle cx="128" cy="128" r="100" fill="#2a2e33" stroke="#1a1d21" stroke-width="3"/>
+          <circle cx="128" cy="128" r="90" fill="none" stroke="#3a3e43" stroke-width="2"/>
+          <circle cx="128" cy="50" r="8" fill="#1a1d21"/>
+          
+          <!-- Side brush (animated) -->
+          <g class="side-brush">
+            <circle cx="185" cy="90" r="15" fill="#4a4e53" stroke="#2a2e33" stroke-width="2"/>
+            <line x1="185" y1="90" x2="195" y2="80" stroke="#6a6e73" stroke-width="2" stroke-linecap="round"/>
+            <line x1="185" y1="90" x2="195" y2="100" stroke="#6a6e73" stroke-width="2" stroke-linecap="round"/>
+            <line x1="185" y1="90" x2="175" y2="80" stroke="#6a6e73" stroke-width="2" stroke-linecap="round"/>
+            <line x1="185" y1="90" x2="175" y2="100" stroke="#6a6e73" stroke-width="2" stroke-linecap="round"/>
+          </g>
+          
+          <!-- Mop pad (animated) -->
+          <g class="mop-pad">
+            <ellipse cx="128" cy="200" rx="35" ry="15" fill="#5a7a9a" stroke="#3a5a7a" stroke-width="2"/>
+            <line x1="105" y1="200" x2="151" y2="200" stroke="#7a9aba" stroke-width="1" opacity="0.6"/>
+            <line x1="110" y1="195" x2="146" y2="195" stroke="#7a9aba" stroke-width="1" opacity="0.6"/>
+            <line x1="110" y1="205" x2="146" y2="205" stroke="#7a9aba" stroke-width="1" opacity="0.6"/>
+          </g>
+          
+          <!-- Center button -->
+          <circle cx="128" cy="128" r="25" fill="#1a1d21"/>
+          <circle cx="128" cy="128" r="20" fill="#2a2e33" stroke="#4a4e53" stroke-width="1"/>
+        </svg>
       </div>
     `;
   }
