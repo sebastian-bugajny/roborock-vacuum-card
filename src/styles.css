@@ -79,26 +79,27 @@ ha-card {
     align-items: center;
     padding: var(--vc-spacing);
     padding-bottom: 0;
+    width: 100%;
 
     svg {
       max-width: 100px;
       max-height: 100px;
-      width: 100%;
-      height: auto;
+      width: 100px;
+      height: 100px;
+      display: block;
+      margin: 0 auto;
     }
 
     /* Animate side brush when cleaning */
     &.cleaning .side-brush {
       animation: roborock-spin-fast 1.5s linear infinite;
-      transform-origin: 185px 90px;
-      transform-box: fill-box;
+      transform-origin: center;
     }
 
     /* Animate mop pad when cleaning (slower) */
     &.cleaning .mop-pad {
       animation: roborock-spin-slow 3s linear infinite;
-      transform-origin: 128px 200px;
-      transform-box: fill-box;
+      transform-origin: center;
     }
   }
 
