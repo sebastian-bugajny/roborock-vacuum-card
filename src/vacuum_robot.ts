@@ -83,12 +83,19 @@ export class VacuumRobot {
     if (!this.hass || !this.entity_id) {
       return RoborockMopMode.High; // Default value
     }
-    const entityId = this.mop_intensity_entity ?? `select.${this.name}_mop_intensity`;
-    const entity = this.hass.states[entityId];
-    if (!entity) {
+    const intensityEntityId = this.mop_intensity_entity ?? `select.${this.name}_mop_intensity`;
+    const modeEntityId = this.mop_mode_entity ?? `select.${this.name}_mop_mode`;
+    
+    const intensityEntity = this.hass.states[intensityEntityId];
+    const modeEntity = this.hass.states[modeEntityId];
+    
+    console.log('[getMopMode] intensityEntityId:', intensityEntityId, '| value:', intensityEntity?.state);
+    console.log('[getMopMode] modeEntityId:', modeEntityId, '| value:', modeEntity?.state);
+    
+    if (!intensityEntity) {
       return RoborockMopMode.High;
     }
-    return entity.state as RoborockMopMode;
+    return intensityEntity.state as RoborockMopMode;
   }
 
   public getRouteMode(): RoborockRouteMode {

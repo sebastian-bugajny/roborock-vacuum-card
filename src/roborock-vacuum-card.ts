@@ -403,6 +403,8 @@ export class RoborockVacuumCard extends LitElement {
 
     console.log('[renderMode] suction:', suction, '| mop:', mop, '| route:', route, '| isMopOnly:', isMopOnly, '| isVacOnly:', isVacOnly);
     console.log('[renderMode] mop === RoborockMopMode.Off?', mop === RoborockMopMode.Off, '| mop value:', mop, '| RoborockMopMode.Off:', RoborockMopMode.Off);
+    console.log('[renderMode] typeof mop:', typeof mop, '| typeof RoborockMopMode.Off:', typeof RoborockMopMode.Off);
+    console.log('[renderMode] Warunek ikony mopa: !isVacOnly && mop !== RoborockMopMode.Off =', !isVacOnly && mop !== RoborockMopMode.Off);
 
     // Show suction icon if not in Mop-only mode
     if (!isMopOnly)
