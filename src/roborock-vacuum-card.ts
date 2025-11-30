@@ -404,14 +404,17 @@ export class RoborockVacuumCard extends LitElement {
     console.log('[renderMode] suction:', suction, '| mop:', mop, '| route:', route, '| isMopOnly:', isMopOnly, '| isVacOnly:', isVacOnly);
     console.log('[renderMode] mop === RoborockMopMode.Off?', mop === RoborockMopMode.Off, '| mop value:', mop, '| RoborockMopMode.Off:', RoborockMopMode.Off);
     console.log('[renderMode] typeof mop:', typeof mop, '| typeof RoborockMopMode.Off:', typeof RoborockMopMode.Off);
-    console.log('[renderMode] Warunek ikony mopa: !isVacOnly && mop !== RoborockMopMode.Off =', !isVacOnly && mop !== RoborockMopMode.Off);
+    
+    const isMopActiveNow = this.robot.isMopActive();
+    console.log('[renderMode] isMopActive:', isMopActiveNow);
+    console.log('[renderMode] Warunek ikony mopa: !isVacOnly && isMopActive =', !isVacOnly && isMopActiveNow);
 
     // Show suction icon if not in Mop-only mode
     if (!isMopOnly)
       icons.push(getSuctionIcon(suction, 24, this.iconColor));
     
-    // Show mop icon if not in Vac-only mode  
-    if (!isVacOnly && mop !== RoborockMopMode.Off)
+    // Show mop icon if not in Vac-only mode AND mop is active
+    if (!isVacOnly && isMopActiveNow)
       icons.push(getMopIcon(mop, 24, this.iconColor));
     
     // Always show route icon
