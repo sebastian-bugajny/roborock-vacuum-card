@@ -98,6 +98,25 @@ export class VacuumRobot {
     return intensityEntity.state as RoborockMopMode;
   }
 
+  // Check if mop is active based on mop_mode_entity
+  public isMopActive(): boolean {
+    if (!this.hass || !this.entity_id) {
+      return false;
+    }
+    const modeEntityId = this.mop_mode_entity ?? `select.${this.name}_mop_mode`;
+    const modeEntity = this.hass.states[modeEntityId];
+    
+    if (!modeEntity) {
+      return false;
+    }
+    
+    const mode = modeEntity.state.toLowerCase();
+    console.log('[isMopActive] modeEntity:', modeEntityId, '| value:', modeEntity.state, '| isMopActive:', mode === 'mop' || mode === 'vacuum_and_mop');
+    
+    // Mop is active if mode is 'mop' or 'vacuum_and_mop'
+    return mode === 'mop' || mode === 'vacuum_and_mop';
+  }
+
   public getRouteMode(): RoborockRouteMode {
     if (!this.hass || !this.entity_id) {
       return RoborockRouteMode.Standard; // Default value
