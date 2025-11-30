@@ -92,28 +92,31 @@ export class VacuumRobot {
     return entity.state as RoborockMopMode;
   }
 
-  // Check if mop is active based on mop_intensity_entity
-  // In Polish integration, mop is active when intensity is NOT 'off'
+  // Check if mop is active based on multiple sensors
+  // In Polish integration, we need to check both intensity and route mode
   public isMopActive(): boolean {
     if (!this.hass || !this.entity_id) {
       return false;
     }
     
-    // Check mop_intensity_entity instead of mop_mode_entity
-    // because in Polish integration mop_mode_entity contains route mode
+    // Check mop_intensity_entity
     const intensityEntityId = this.mop_intensity_entity ?? `select.${this.name}_mop_intensity`;
     const intensityEntity = this.hass.states[intensityEntityId];
     
-    if (!intensityEntity) {
-      return false;
-    }
+    // Check route mode (mop_mode_entity in Polish integration)
+    const routeEntityId = this.mop_mode_entity ?? `select.${this.name}_mop_mode`;
+    const routeEntity = this.hass.states[routeEntityId];
     
-    const intensity = intensityEntity.state.toLowerCase();
-    console.log('[isMopActive] intensityEntity:', intensityEntityId, '| value:', intensityEntity.state, '| lowercase:', intensity);
+    const intensity = intensityEntity?.state.toLowerCase() || 'off';
+    const route = routeEntity?.state.toLowerCase() || 'standard';
     
-    // Mop is active when intensity is anything except 'off'
-    // Values: 'off', 'low', 'medium', 'high', 'vac_followed_by_mop', 'mop_after_vac'
-    const isMopActive = intensity !== 'off';
+    console.log('[isMopActive] intensityEntity:', intensityEntityId, '| value:', intensityEntity?.state, '| lowercase:', intensity);
+    console.log('[isMopActive] routeEntity:', routeEntityId, '| value:', routeEntity?.state, '| lowercase:', route);
+    
+    // Mop is active when:
+    // 1. Intensity is NOT 'off' (low/medium/high/vac_followed_by_mop), OR
+    // 2. Route is 'deep' or 'deep_plus' (mop-only modes)
+    const isMopActive = intensity !== 'off' || route === 'deep' || route === 'deep_plus';
     
     console.log('[isMopActive] isMopActive:', isMopActive);
     return isMopActive;
