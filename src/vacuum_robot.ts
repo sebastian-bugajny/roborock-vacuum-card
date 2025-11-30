@@ -85,6 +85,7 @@ export class VacuumRobot {
     }
     const entityId = this.mop_intensity_entity ?? `select.${this.name}_mop_intensity`;
     const entity = this.hass.states[entityId];
+    console.log('[getMopMode] entityId:', entityId, '| value:', entity?.state);
     if (!entity) {
       return RoborockMopMode.High;
     }
