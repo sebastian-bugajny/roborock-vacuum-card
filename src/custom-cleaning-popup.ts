@@ -379,7 +379,7 @@ export class CustomCleaningPopup extends LitElement {
   }
 
   private isSupportedMopMode(mode: RoborockMopMode, cleaningMode: RoborockCleaningMode): boolean {
-    if (mode == RoborockMopMode.Off)
+    if (mode === RoborockMopMode.Off)
       return false;
     return VacuumRobot.isSupportedMopMode(mode, cleaningMode);
   }
