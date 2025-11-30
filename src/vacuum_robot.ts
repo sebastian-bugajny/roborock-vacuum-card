@@ -92,41 +92,38 @@ export class VacuumRobot {
     return entity.state as RoborockMopMode;
   }
 
-  // Check if mop is active based on mop_mode_entity
+  // Check if mop is active based on mop_intensity_entity
+  // In Polish integration, mop is active when intensity is NOT 'off'
   public isMopActive(): boolean {
     if (!this.hass || !this.entity_id) {
       return false;
     }
-    const modeEntityId = this.mop_mode_entity ?? `select.${this.name}_mop_mode`;
-    const modeEntity = this.hass.states[modeEntityId];
     
-    if (!modeEntity) {
+    // Check mop_intensity_entity instead of mop_mode_entity
+    // because in Polish integration mop_mode_entity contains route mode
+    const intensityEntityId = this.mop_intensity_entity ?? `select.${this.name}_mop_intensity`;
+    const intensityEntity = this.hass.states[intensityEntityId];
+    
+    if (!intensityEntity) {
       return false;
     }
     
-    const mode = modeEntity.state.toLowerCase();
-    console.log('[isMopActive] modeEntity:', modeEntityId, '| value:', modeEntity.state, '| lowercase:', mode);
+    const intensity = intensityEntity.state.toLowerCase();
+    console.log('[isMopActive] intensityEntity:', intensityEntityId, '| value:', intensityEntity.state, '| lowercase:', intensity);
     
-    // Check various possible values for mop being active:
-    // English: 'mop', 'vacuum_and_mop'
-    // Polish might use: 'mopowanie', 'odkurzanie_i_mopowanie'
-    // Or it might return route values: 'deep', 'deep_plus' when mopping
-    const isMopMode = mode === 'mop' || 
-                      mode === 'vacuum_and_mop' || 
-                      mode === 'mopowanie' ||
-                      mode === 'odkurzanie_i_mopowanie' ||
-                      mode === 'deep' ||
-                      mode === 'deep_plus';
+    // Mop is active when intensity is anything except 'off'
+    // Values: 'off', 'low', 'medium', 'high', 'vac_followed_by_mop', 'mop_after_vac'
+    const isMopActive = intensity !== 'off';
     
-    console.log('[isMopActive] isMopActive:', isMopMode);
-    return isMopMode;
+    console.log('[isMopActive] isMopActive:', isMopActive);
+    return isMopActive;
   }
 
   public getRouteMode(): RoborockRouteMode {
     if (!this.hass || !this.entity_id) {
       return RoborockRouteMode.Standard; // Default value
     }
-    // Route mode should have its own entity, for now we check mop_mode_entity as fallback
+    // In Polish integration, mop_mode_entity actually contains route mode (deep, standard, etc.)
     const entityId = this.mop_mode_entity ?? `select.${this.name}_mop_mode`;
     const entity = this.hass.states[entityId];
     if (!entity) {
