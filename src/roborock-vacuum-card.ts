@@ -376,13 +376,16 @@ export class RoborockVacuumCard extends LitElement {
     const isVacOnly = suction === RoborockSuctionMode.MaxPlus;
 
     console.log('[renderMode] suction:', suction, '| mop:', mop, '| route:', route, '| isMopOnly:', isMopOnly, '| isVacOnly:', isVacOnly);
+    
+    const isMopActiveNow = this.robot.isMopActive();
+    console.log('[renderMode] isMopActive:', isMopActiveNow);
 
     // Show suction icon if not in Mop-only mode
     if (!isMopOnly)
       icons.push(getSuctionIcon(suction, 24, this.iconColor));
     
-    // Show mop icon if not in Vac-only mode  
-    if (!isVacOnly && mop != RoborockMopMode.Off)
+    // Show mop icon if not in Vac-only mode AND mop is active
+    if (!isVacOnly && isMopActiveNow)
       icons.push(getMopIcon(mop, 24, this.iconColor));
     
     // Always show route icon
