@@ -104,21 +104,34 @@ export class VacuumRobot {
     }
     
     const mode = modeEntity.state.toLowerCase();
-    console.log('[isMopActive] modeEntity:', modeEntityId, '| value:', modeEntity.state, '| isMopActive:', mode === 'mop' || mode === 'vacuum_and_mop');
+    console.log('[isMopActive] modeEntity:', modeEntityId, '| value:', modeEntity.state, '| lowercase:', mode);
     
-    // Mop is active if mode is 'mop' or 'vacuum_and_mop'
-    return mode === 'mop' || mode === 'vacuum_and_mop';
+    // Check various possible values for mop being active:
+    // English: 'mop', 'vacuum_and_mop'
+    // Polish might use: 'mopowanie', 'odkurzanie_i_mopowanie'
+    // Or it might return route values: 'deep', 'deep_plus' when mopping
+    const isMopMode = mode === 'mop' || 
+                      mode === 'vacuum_and_mop' || 
+                      mode === 'mopowanie' ||
+                      mode === 'odkurzanie_i_mopowanie' ||
+                      mode === 'deep' ||
+                      mode === 'deep_plus';
+    
+    console.log('[isMopActive] isMopActive:', isMopMode);
+    return isMopMode;
   }
 
   public getRouteMode(): RoborockRouteMode {
     if (!this.hass || !this.entity_id) {
       return RoborockRouteMode.Standard; // Default value
     }
+    // Route mode should have its own entity, for now we check mop_mode_entity as fallback
     const entityId = this.mop_mode_entity ?? `select.${this.name}_mop_mode`;
     const entity = this.hass.states[entityId];
     if (!entity) {
       return RoborockRouteMode.Standard;
     }
+    console.log('[getRouteMode] entityId:', entityId, '| value:', entity.state);
     return entity.state as RoborockRouteMode;
   }
 
