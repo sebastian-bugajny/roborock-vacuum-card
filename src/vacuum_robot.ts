@@ -79,6 +79,8 @@ export class VacuumRobot {
     return this.getAttributeValue(entity, 'fan_speed');
   }
 
+  private lastMopIntensity: RoborockMopMode | null = null;
+
   public getMopMode(): RoborockMopMode {
     if (!this.hass || !this.entity_id) {
       return RoborockMopMode.High; // Default value
@@ -89,6 +91,22 @@ export class VacuumRobot {
     if (!entity) {
       return RoborockMopMode.High;
     }
+    
+    const currentValue = entity.state.toLowerCase();
+    
+    // If value is vac_followed_by_mop or mop_after_vac, return last known intensity
+    if (currentValue === 'vac_followed_by_mop' || currentValue === 'mop_after_vac') {
+      console.log('[getMopMode] vac_followed_by_mop detected, returning last intensity:', this.lastMopIntensity);
+      // If we don't have a stored value, default to medium
+      return this.lastMopIntensity || RoborockMopMode.Medium;
+    }
+    
+    // If it's a valid intensity value, store it for later
+    if (currentValue === 'low' || currentValue === 'medium' || currentValue === 'high') {
+      this.lastMopIntensity = currentValue as RoborockMopMode;
+      console.log('[getMopMode] Stored intensity:', this.lastMopIntensity);
+    }
+    
     return entity.state as RoborockMopMode;
   }
 
