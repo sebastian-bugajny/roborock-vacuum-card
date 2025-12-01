@@ -94,6 +94,34 @@ export class RoborockVacuumCard extends LitElement {
     super.disconnectedCallback();
   }
 
+  protected shouldUpdate(changedProps: Map<string, any>): boolean {
+    // Always update when hass changes - this ensures we react to entity state changes
+    if (changedProps.has('hass')) {
+      const oldHass = changedProps.get('hass') as MyHomeAssistant | undefined;
+      const newHass = this.hass;
+      
+      if (oldHass && newHass) {
+        // Check if any relevant entities changed
+        const mopIntensityEntity = this.config?.mop_intensity_entity ?? `select.${this.name}_mop_intensity`;
+        const mopModeEntity = this.config?.mop_mode_entity ?? `select.${this.name}_mop_mode`;
+        const vacuumEntity = this.config?.entity;
+        
+        const mopIntensityChanged = oldHass.states[mopIntensityEntity]?.state !== newHass.states[mopIntensityEntity]?.state;
+        const mopModeChanged = oldHass.states[mopModeEntity]?.state !== newHass.states[mopModeEntity]?.state;
+        const vacuumChanged = oldHass.states[vacuumEntity]?.state !== newHass.states[vacuumEntity]?.state ||
+                             oldHass.states[vacuumEntity]?.attributes?.fan_speed !== newHass.states[vacuumEntity]?.attributes?.fan_speed;
+        
+        if (mopIntensityChanged || mopModeChanged || vacuumChanged) {
+          return true;
+        }
+      }
+      
+      return true;
+    }
+    
+    return super.shouldUpdate(changedProps);
+  }
+
   private onPopupShow(event: MouseEvent) {
     event.stopPropagation();
     this.popupActive = true;
@@ -376,17 +404,17 @@ export class RoborockVacuumCard extends LitElement {
     const isVacOnly = suction === RoborockSuctionMode.MaxPlus;
 
     console.log('[renderMode] suction:', suction, '| mop:', mop, '| route:', route, '| isMopOnly:', isMopOnly, '| isVacOnly:', isVacOnly);
-    
-    const isMopActiveNow = this.robot.isMopActive();
-    console.log('[renderMode] isMopActive:', isMopActiveNow);
 
     // Show suction icon if not in Mop-only mode
     if (!isMopOnly)
       icons.push(getSuctionIcon(suction, 24, this.iconColor));
     
-    // Show mop icon if not in Vac-only mode AND mop is active
-    if (!isVacOnly && isMopActiveNow)
-      icons.push(getMopIcon(mop, 24, this.iconColor));
+    // Show mop icon if not in Vac-only mode (getMopIcon returns nothing for 'off')
+    if (!isVacOnly) {
+      const mopIcon = getMopIcon(mop, 24, this.iconColor);
+      if (mopIcon !== nothing)
+        icons.push(mopIcon);
+    }
     
     // Always show route icon
     icons.push(getRouteIcon(route, 24, this.iconColor));
