@@ -24,6 +24,11 @@ export function getMoppingIcon(name: string, size: number, color: string): Templ
         'vac_followed_by_mop': html`<svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" width="${size}" height="${size}" viewBox="0 0 11.113 11.113"><path d="M55.792 136.055a3.324 3.324 0 0 1-6.648 0c0-1.836 1.705-3.847 3.324-4.713 1.659.787 3.324 2.877 3.324 4.713z" style="fill:none;stroke:${color};stroke-width:.529167;stroke-linecap:round;stroke-miterlimit:2.5" transform="translate(-46.818 -130.73)"/><path d="M49.641 134.22s.349.56 1.612.56c1.264 0 2.342-.818 2.68-.893.074-.033 1.165-.06 1.165-.06M48.117 132.983c-.468.854-.69 1.52-.819 2.432M47.415 137.602c.234 1.356 1.079 2.163 1.465 2.584" style="fill:none;stroke:${color};stroke-width:.529167;stroke-linecap:round;stroke-miterlimit:2.5" transform="translate(-46.818 -130.73)"/><path d="M48.117 132.983c-.468.854-.69 1.52-.819 2.432M47.415 137.602c.234 1.356 1.079 2.163 1.465 2.584" style="fill:none;stroke:${color};stroke-width:.529167;stroke-linecap:round;stroke-miterlimit:2.5" transform="matrix(-1 0 0 1 57.873 -130.73)"/></svg>`,
     };
 
+    // Return nothing for 'off' state (mop not active)
+    if (name === 'off') {
+        return nothing;
+    }
+
     // If icon not found, use 'high' as default
     if (!icons[name]) {
         console.log('[getMoppingIcon] Unknown mop mode:', name, '- using high as default');
