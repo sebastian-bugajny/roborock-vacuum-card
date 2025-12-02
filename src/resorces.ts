@@ -31,7 +31,6 @@ export function getMoppingIcon(name: string, size: number, color: string): Templ
 
     // If icon not found, use 'high' as default
     if (!icons[name]) {
-        console.log('[getMoppingIcon] Unknown mop mode:', name, '- using high as default');
         return icons['high'];
     }
 
