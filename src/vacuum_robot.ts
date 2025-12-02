@@ -87,7 +87,6 @@ export class VacuumRobot {
     }
     const entityId = this.mop_intensity_entity ?? `select.${this.name}_mop_intensity`;
     const entity = this.hass.states[entityId];
-    console.log('[getMopMode] entityId:', entityId, '| value:', entity?.state);
     if (!entity) {
       return RoborockMopMode.High;
     }
@@ -96,7 +95,6 @@ export class VacuumRobot {
     
     // If value is vac_followed_by_mop or mop_after_vac, return last known intensity
     if (currentValue === 'vac_followed_by_mop' || currentValue === 'mop_after_vac') {
-      console.log('[getMopMode] vac_followed_by_mop detected, returning last intensity:', this.lastMopIntensity);
       // If we don't have a stored value, default to medium
       return this.lastMopIntensity || RoborockMopMode.Medium;
     }
@@ -104,7 +102,6 @@ export class VacuumRobot {
     // Extract intensity from vac_and_mop_* values (e.g., "vac_and_mop_high" -> "high")
     if (currentValue.startsWith('vac_and_mop_')) {
       const intensity = currentValue.replace('vac_and_mop_', '') as RoborockMopMode;
-      console.log('[getMopMode] vac_and_mop detected, extracted intensity:', intensity);
       this.lastMopIntensity = intensity;
       return intensity;
     }
@@ -116,7 +113,6 @@ export class VacuumRobot {
       const vacuumMopIntensity = vacuumEntity?.attributes?.mop_intensity;
       if (vacuumMopIntensity && vacuumMopIntensity !== 'off') {
         const intensity = vacuumMopIntensity.toLowerCase() as RoborockMopMode;
-        console.log('[getMopMode] Found mop_intensity in vacuum attributes:', intensity);
         return intensity;
       }
       // If still off, return the last known or default
@@ -126,7 +122,6 @@ export class VacuumRobot {
     // If it's a valid intensity value, store it for later
     if (currentValue === 'low' || currentValue === 'medium' || currentValue === 'high') {
       this.lastMopIntensity = currentValue as RoborockMopMode;
-      console.log('[getMopMode] Stored intensity:', this.lastMopIntensity);
     }
     
     return entity.state as RoborockMopMode;
@@ -150,15 +145,11 @@ export class VacuumRobot {
     const intensity = intensityEntity?.state.toLowerCase() || 'off';
     const route = routeEntity?.state.toLowerCase() || 'standard';
     
-    console.log('[isMopActive] intensityEntity:', intensityEntityId, '| value:', intensityEntity?.state, '| lowercase:', intensity);
-    console.log('[isMopActive] routeEntity:', routeEntityId, '| value:', routeEntity?.state, '| lowercase:', route);
-    
     // Mop is active when:
     // 1. Intensity is NOT 'off' (low/medium/high/vac_followed_by_mop), OR
     // 2. Route is 'deep' or 'deep_plus' (mop-only modes)
     const isMopActive = intensity !== 'off' || route === 'deep' || route === 'deep_plus';
     
-    console.log('[isMopActive] isMopActive:', isMopActive);
     return isMopActive;
   }
 
@@ -172,7 +163,6 @@ export class VacuumRobot {
     if (!entity) {
       return RoborockRouteMode.Standard;
     }
-    console.log('[getRouteMode] entityId:', entityId, '| value:', entity.state);
     return entity.state as RoborockRouteMode;
   }
 
