@@ -110,12 +110,17 @@ export class VacuumRobot {
     // In Vac+Mop mode, the select entity shows 'off' but the vacuum entity has the real value
     if (currentValue === 'off') {
       const vacuumEntity = this.hass.states[this.entity_id];
+      console.log('[getMopMode] mop_intensity is off, checking vacuum entity:', this.entity_id);
+      console.log('[getMopMode] vacuum entity attributes:', vacuumEntity?.attributes);
       const vacuumMopIntensity = vacuumEntity?.attributes?.mop_intensity;
+      console.log('[getMopMode] vacuum mop_intensity attribute:', vacuumMopIntensity);
       if (vacuumMopIntensity && vacuumMopIntensity !== 'off') {
         const intensity = vacuumMopIntensity.toLowerCase() as RoborockMopMode;
+        console.log('[getMopMode] Found mop_intensity in vacuum attributes:', intensity);
         return intensity;
       }
       // If still off, return the last known or default
+      console.log('[getMopMode] No valid mop_intensity found, returning:', this.lastMopIntensity || 'off');
       return this.lastMopIntensity || RoborockMopMode.Off;
     }
     
