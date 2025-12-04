@@ -128,6 +128,8 @@ export class CustomCleaningPopup extends LitElement {
     try {
       // Save cleaning mode to localStorage
       localStorage.setItem('roborock_last_cleaning_mode', this.activeCleaningMode);
+      // Save mop intensity for later reference (when vacuum shows 'off' in vac+mop mode)
+      localStorage.setItem(`roborock_${this.robot.name}_last_mop_intensity`, this.activeMopMode);
       
       await this.robot.setSuctionModeAsync(this.activeSuctionMode as RoborockSuctionMode);
       await new Promise(r => setTimeout(r, delay));
@@ -155,6 +157,9 @@ export class CustomCleaningPopup extends LitElement {
     this.popupRequestInProgress = true;
 
     try {
+      // Save mop intensity for later reference (when vacuum shows 'off' in vac+mop mode)
+      localStorage.setItem(`roborock_${this.robot.name}_last_mop_intensity`, this.activeMopMode);
+      
       await this.robot.setSuctionModeAsync(this.activeSuctionMode as RoborockSuctionMode);
       await new Promise(r => setTimeout(r, delay));
 

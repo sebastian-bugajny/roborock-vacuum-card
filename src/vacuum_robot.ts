@@ -81,6 +81,22 @@ export class VacuumRobot {
 
   private lastMopIntensity: RoborockMopMode | null = null;
 
+  private getStorageKey(): string {
+    return `roborock_${this.name}_last_mop_intensity`;
+  }
+
+  private getLastStoredMopIntensity(): RoborockMopMode | null {
+    if (typeof localStorage === 'undefined') return null;
+    const stored = localStorage.getItem(this.getStorageKey());
+    return stored as RoborockMopMode | null;
+  }
+
+  private storeLastMopIntensity(intensity: RoborockMopMode): void {
+    if (typeof localStorage === 'undefined') return;
+    localStorage.setItem(this.getStorageKey(), intensity);
+    this.lastMopIntensity = intensity;
+  }
+
   public getMopMode(): RoborockMopMode {
     if (!this.hass || !this.entity_id) {
       return RoborockMopMode.High; // Default value
@@ -93,6 +109,11 @@ export class VacuumRobot {
     
     const currentValue = entity.state.toLowerCase();
     
+    // Load last stored intensity if not in memory
+    if (!this.lastMopIntensity) {
+      this.lastMopIntensity = this.getLastStoredMopIntensity();
+    }
+    
     // If value is vac_followed_by_mop or mop_after_vac, return last known intensity
     if (currentValue === 'vac_followed_by_mop' || currentValue === 'mop_after_vac') {
       // If we don't have a stored value, default to medium
@@ -102,31 +123,27 @@ export class VacuumRobot {
     // Extract intensity from vac_and_mop_* values (e.g., "vac_and_mop_high" -> "high")
     if (currentValue.startsWith('vac_and_mop_')) {
       const intensity = currentValue.replace('vac_and_mop_', '') as RoborockMopMode;
-      this.lastMopIntensity = intensity;
+      this.storeLastMopIntensity(intensity);
       return intensity;
     }
     
     // If mop_intensity is 'off', check vacuum entity's mop_intensity attribute
-    // In Vac+Mop mode, the select entity shows 'off' but the vacuum entity has the real value
+    // In Vac+Mop mode, the select entity shows 'off' but we should return last known value
     if (currentValue === 'off') {
       const vacuumEntity = this.hass.states[this.entity_id];
-      console.log('[getMopMode] mop_intensity is off, checking vacuum entity:', this.entity_id);
-      console.log('[getMopMode] vacuum entity attributes:', vacuumEntity?.attributes);
       const vacuumMopIntensity = vacuumEntity?.attributes?.mop_intensity;
-      console.log('[getMopMode] vacuum mop_intensity attribute:', vacuumMopIntensity);
       if (vacuumMopIntensity && vacuumMopIntensity !== 'off') {
         const intensity = vacuumMopIntensity.toLowerCase() as RoborockMopMode;
-        console.log('[getMopMode] Found mop_intensity in vacuum attributes:', intensity);
+        this.storeLastMopIntensity(intensity);
         return intensity;
       }
-      // If still off, return the last known or default
-      console.log('[getMopMode] No valid mop_intensity found, returning:', this.lastMopIntensity || 'off');
+      // If no valid intensity in vacuum attributes, return last known value or off
       return this.lastMopIntensity || RoborockMopMode.Off;
     }
     
     // If it's a valid intensity value, store it for later
     if (currentValue === 'low' || currentValue === 'medium' || currentValue === 'high') {
-      this.lastMopIntensity = currentValue as RoborockMopMode;
+      this.storeLastMopIntensity(currentValue as RoborockMopMode);
     }
     
     return entity.state as RoborockMopMode;
