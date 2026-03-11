@@ -2,6 +2,9 @@ import { html, nothing } from 'lit';
 import { Template } from './types'
 
 export function getSuctionIcon(name: string, size: number, color: string): Template {
+    if (name === 'off' || name === 'off_raise_main_brush')
+        return nothing;
+
     const icons: Record<string, Template> = {
         'quiet': html`<svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" width="${size}" height="${size}" viewBox="0 0 11.112 11.112"><path fill="none" stroke="${color}" stroke-width=".529" d="M5.795.8a4.736 4.736 0 1 0 0 9.472 4.736 4.736 0 0 0 4.352-2.874A4.2 4.2 0 0 1 5.61 3.212a4.2 4.2 0 0 1 .742-2.38C6.16.81 5.961.806 5.795.8z"/></svg>`,
         'balanced': html`<svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" width="${size}" height="${size}" viewBox="0 0 11.112 11.113"><path d="M55.986 146.233c1.059-.033 3.044.908 3.017 2.947-.024 1.88-1.601 3.05-2.858 3.1" style="fill:none;fill-opacity:1;stroke:${color};stroke-width:.529167;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:2.5;stroke-dasharray:none;stroke-opacity:1" transform="translate(-49.835 -142.332)"/><path d="M56.6 148.146c-.501.933-2.309 2.181-4.061 1.139-1.616-.961-1.842-2.913-1.256-4.026" style="fill:none;fill-opacity:1;stroke:${color};stroke-width:.529167;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:2.5;stroke-dasharray:none;stroke-opacity:1" transform="translate(-49.835 -142.332)"/><path d="M54.637 147.601c-.558-.9-.736-3.09 1.043-4.086 1.64-.918 3.443-.138 4.115.925" style="fill:none;fill-opacity:1;stroke:${color};stroke-width:.529167;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:2.5;stroke-dasharray:none;stroke-opacity:1" transform="translate(-49.835 -142.332)"/></svg>`,

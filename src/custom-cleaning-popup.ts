@@ -77,9 +77,24 @@ export class CustomCleaningPopup extends LitElement {
 
     // Always start with VacAndMop mode and set appropriate defaults
     this.activeCleaningMode = RoborockCleaningMode.VacAndMop;
-    this.activeSuctionMode = RoborockSuctionMode.Turbo;
-    this.activeMopMode = RoborockMopMode.High;
-    this.activeRouteMode = RoborockRouteMode.Standard;
+    this.activeSuctionMode = this.pickSupportedSuctionMode([
+      RoborockSuctionMode.Turbo,
+      RoborockSuctionMode.Max,
+      RoborockSuctionMode.Balanced,
+      RoborockSuctionMode.Quiet,
+      RoborockSuctionMode.MaxPlus,
+    ]);
+    this.activeMopMode = this.pickSupportedMopMode([
+      RoborockMopMode.High,
+      RoborockMopMode.Medium,
+      RoborockMopMode.Low,
+    ]);
+    this.activeRouteMode = this.pickSupportedRouteMode([
+      RoborockRouteMode.Standard,
+      RoborockRouteMode.Fast,
+      RoborockRouteMode.Deep,
+      RoborockRouteMode.DeepPlus,
+    ]);
     this.modesInitialized = true;
   }
 
@@ -134,8 +149,10 @@ export class CustomCleaningPopup extends LitElement {
       await this.robot.setSuctionModeAsync(this.activeSuctionMode as RoborockSuctionMode);
       await new Promise(r => setTimeout(r, delay));
 
-      await this.robot.setMopModeAsync(this.activeMopMode as RoborockMopMode);
-      await new Promise(r => setTimeout(r, delay));
+      if (this.activeCleaningMode !== RoborockCleaningMode.Vac) {
+        await this.robot.setMopModeAsync(this.activeMopMode as RoborockMopMode);
+        await new Promise(r => setTimeout(r, delay));
+      }
 
       await this.robot.setRouteModeAsync(this.activeRouteMode as RoborockRouteMode);
       await new Promise(r => setTimeout(r, delay));
@@ -163,8 +180,10 @@ export class CustomCleaningPopup extends LitElement {
       await this.robot.setSuctionModeAsync(this.activeSuctionMode as RoborockSuctionMode);
       await new Promise(r => setTimeout(r, delay));
 
-      await this.robot.setMopModeAsync(this.activeMopMode as RoborockMopMode);
-      await new Promise(r => setTimeout(r, delay));
+      if (this.activeCleaningMode !== RoborockCleaningMode.Vac) {
+        await this.robot.setMopModeAsync(this.activeMopMode as RoborockMopMode);
+        await new Promise(r => setTimeout(r, delay));
+      }
 
       await this.robot.setRouteModeAsync(this.activeRouteMode as RoborockRouteMode);
       await new Promise(r => setTimeout(r, delay));
@@ -266,7 +285,7 @@ export class CustomCleaningPopup extends LitElement {
     if (this.activeCleaningMode == RoborockCleaningMode.Mop)
       return nothing;
 
-    this.suctionModes = Object.values(RoborockSuctionMode)
+    this.suctionModes = this.robot.getAvailableSuctionModes()
       .map(v => ({ icon: getSuctionIcon(v, 24, this.iconColor), value: v, disabled: !this.isSupportedSuctionMode(v, this.activeCleaningMode) }));
     const mode = localize(`suction_mode.${this.activeSuctionMode}`);
 
@@ -283,7 +302,7 @@ export class CustomCleaningPopup extends LitElement {
     if (this.activeCleaningMode == RoborockCleaningMode.Vac)
       return nothing;
 
-    this.mopModes = Object.values(RoborockMopMode)
+    this.mopModes = this.robot.getVisibleMopModes()
       .map(v => ({ icon: getMoppingIcon(v, 24, this.iconColor), value: v, disabled: !this.isSupportedMopMode(v, this.activeCleaningMode) }));
     const mode = localize(`mop_mode.${this.activeMopMode}`);
 
@@ -297,7 +316,7 @@ export class CustomCleaningPopup extends LitElement {
   }
 
   private renderRouteMode(): Template {
-    this.routeModes = Object.values(RoborockRouteMode)
+    this.routeModes = this.robot.getAvailableRouteModes()
       .map(v => ({ icon: getRouteIcon(v, 24, this.iconColor), value: v, disabled: !this.isSupportedRouteMode(v, this.activeCleaningMode) }));
     const mode = localize(`route_mode.${this.activeRouteMode}`);
 
@@ -350,35 +369,77 @@ export class CustomCleaningPopup extends LitElement {
   private fixModesIfNeeded() {
     // Set suction mode based on cleaning mode
     if (this.activeCleaningMode == RoborockCleaningMode.Mop) {
-      this.activeSuctionMode = RoborockSuctionMode.Off;
+      this.activeSuctionMode = this.robot.getPreferredMopOnlySuctionMode();
     } else if (this.activeCleaningMode == RoborockCleaningMode.Vac) {
-      // For Vac mode, always set Max as default
-      this.activeSuctionMode = RoborockSuctionMode.Max;
+      this.activeSuctionMode = this.pickSupportedSuctionMode([
+        RoborockSuctionMode.MaxPlus,
+        RoborockSuctionMode.Max,
+        RoborockSuctionMode.Turbo,
+        RoborockSuctionMode.Balanced,
+        RoborockSuctionMode.Quiet,
+      ]);
     } else {
-      // For VacAndMop mode, always set Turbo as default
-      this.activeSuctionMode = RoborockSuctionMode.Turbo;
+      this.activeSuctionMode = this.pickSupportedSuctionMode([
+        RoborockSuctionMode.Turbo,
+        RoborockSuctionMode.Max,
+        RoborockSuctionMode.Balanced,
+        RoborockSuctionMode.Quiet,
+        RoborockSuctionMode.MaxPlus,
+      ]);
     }
 
     // Set mop mode based on cleaning mode
-    if (this.activeCleaningMode == RoborockCleaningMode.Vac) {
-      this.activeMopMode = RoborockMopMode.Off;
-    } else {
-      // For VacAndMop and Mop modes, set High as default
-      this.activeMopMode = RoborockMopMode.High;
+    if (this.activeCleaningMode != RoborockCleaningMode.Vac) {
+      this.activeMopMode = this.pickSupportedMopMode([
+        RoborockMopMode.High,
+        RoborockMopMode.Medium,
+        RoborockMopMode.Low,
+      ]);
     }
 
     // Set route mode based on cleaning mode
     if (this.activeCleaningMode == RoborockCleaningMode.Mop) {
-      // For Mop mode, always set Deep as default
-      this.activeRouteMode = RoborockRouteMode.Deep;
+      this.activeRouteMode = this.pickSupportedRouteMode([
+        RoborockRouteMode.Deep,
+        RoborockRouteMode.DeepPlus,
+        RoborockRouteMode.Standard,
+        RoborockRouteMode.Fast,
+      ]);
     } else {
-      // For other modes, set Standard as default
-      this.activeRouteMode = RoborockRouteMode.Standard;
+      this.activeRouteMode = this.pickSupportedRouteMode([
+        RoborockRouteMode.Standard,
+        RoborockRouteMode.Fast,
+        RoborockRouteMode.Deep,
+        RoborockRouteMode.DeepPlus,
+      ]);
     }
   }
 
+  private pickSupportedSuctionMode(preferredModes: RoborockSuctionMode[]): RoborockSuctionMode {
+    const availableModes = this.robot?.getAvailableSuctionModes?.() ?? [];
+    return preferredModes.find(mode => availableModes.includes(mode))
+      ?? availableModes.find(mode => ![RoborockSuctionMode.Off, RoborockSuctionMode.OffRaiseMainBrush].includes(mode))
+      ?? availableModes[0]
+      ?? RoborockSuctionMode.Turbo;
+  }
+
+  private pickSupportedMopMode(preferredModes: RoborockMopMode[]): RoborockMopMode {
+    const availableModes = this.robot?.getVisibleMopModes?.() ?? [];
+    return preferredModes.find(mode => availableModes.includes(mode))
+      ?? availableModes.find(mode => mode !== RoborockMopMode.Off)
+      ?? availableModes[0]
+      ?? RoborockMopMode.High;
+  }
+
+  private pickSupportedRouteMode(preferredModes: RoborockRouteMode[]): RoborockRouteMode {
+    const availableModes = this.robot?.getAvailableRouteModes?.() ?? [];
+    return preferredModes.find(mode => availableModes.includes(mode))
+      ?? availableModes[0]
+      ?? RoborockRouteMode.Standard;
+  }
+
   private isSupportedSuctionMode(mode: RoborockSuctionMode, cleaningMode: RoborockCleaningMode): boolean {
-    if (mode == RoborockSuctionMode.Off)
+    if (mode == RoborockSuctionMode.Off || mode == RoborockSuctionMode.OffRaiseMainBrush)
       return false;
     return VacuumRobot.isSupportedSuctionMode(mode, cleaningMode);
   }
