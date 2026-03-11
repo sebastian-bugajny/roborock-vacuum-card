@@ -11,6 +11,16 @@ const OFF_SUCTION_MODES = [RoborockSuctionMode.Off, RoborockSuctionMode.OffRaise
 const INTEGRATION_MOP_MODES = ['off', 'slight', 'low', 'medium', 'moderate', 'high', 'extreme'] as const;
 const NON_OFF_MOP_MODES = ['slight', 'low', 'medium', 'moderate', 'high', 'extreme'] as const;
 const APP_VISIBLE_MOP_MODES = [RoborockMopMode.Low, RoborockMopMode.Medium, RoborockMopMode.High];
+const SUCTION_MODE_COMMANDS: Record<RoborockSuctionMode, number> = {
+  [RoborockSuctionMode.Off]: 105,
+  [RoborockSuctionMode.OffRaiseMainBrush]: 109,
+  [RoborockSuctionMode.Quiet]: 101,
+  [RoborockSuctionMode.Balanced]: 102,
+  [RoborockSuctionMode.Turbo]: 103,
+  [RoborockSuctionMode.Max]: 104,
+  [RoborockSuctionMode.MaxPlus]: 108,
+};
+const WATER_OFF_CODE = 200;
 
 export class VacuumRobot {
   private hass!: MyHomeAssistant;
@@ -291,6 +301,20 @@ export class VacuumRobot {
     return this.hass.callService('vacuum', service, serviceData);
   }
 
+  public sendCommandAsync(command: string, params?: unknown) {
+    if (!this.hass || !this.entity_id) {
+      return Promise.reject('Robot not initialized');
+    }
+
+    const serviceData = {
+      entity_id: this.entity_id,
+      command,
+      params,
+    };
+
+    return this.hass.callService('vacuum', 'send_command', serviceData);
+  }
+
   public startSegmentsCleaningAsync(roborock_area_ids: number[], repeat: number) {
     if (!this.hass || !this.entity_id) {
       return Promise.reject('Robot not initialized');
@@ -331,7 +355,37 @@ export class VacuumRobot {
     return this.hass.callService('vacuum', 'set_fan_speed', {
       entity_id: this.entity_id,
       fan_speed: targetValue,
+    }).catch(() => {
+      const commandValue = SUCTION_MODE_COMMANDS[targetValue];
+      return this.sendCommandAsync('set_custom_mode', [commandValue]);
     });
+  }
+
+  public async disableMopAsync() {
+    if (!this.hass || !this.entity_id) {
+      return Promise.reject('Robot not initialized');
+    }
+
+    const availableModes = this.getAvailableMopModeOptions();
+    const entityId = this.mop_intensity_entity ?? `select.${this.name}_mop_intensity`;
+
+    if (availableModes.includes('off')) {
+      try {
+        await this.hass.callService('select', 'select_option', {
+          entity_id: entityId,
+          option: 'off',
+        });
+        return;
+      } catch {
+        // Fall back to raw vacuum command below.
+      }
+    }
+
+    try {
+      await this.sendCommandAsync('set_water_box_custom_mode', [WATER_OFF_CODE]);
+    } catch {
+      await this.sendCommandAsync('set_water_box_distance_off');
+    }
   }
 
   public setMopModeAsync(value: RoborockMopMode) {

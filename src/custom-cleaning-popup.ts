@@ -131,6 +131,46 @@ export class CustomCleaningPopup extends LitElement {
     this.requestUpdate();
   }
 
+  private async applyCleaningSettings(delay: number) {
+    const sleep = () => new Promise(r => setTimeout(r, delay));
+
+    switch (this.activeCleaningMode) {
+      case RoborockCleaningMode.Mop:
+        await this.robot.setMopModeAsync(this.activeMopMode as RoborockMopMode);
+        await sleep();
+
+        await this.robot.setRouteModeAsync(this.activeRouteMode as RoborockRouteMode);
+        await sleep();
+
+        await this.robot.setSuctionModeAsync(this.robot.getPreferredMopOnlySuctionMode());
+        await sleep();
+        break;
+
+      case RoborockCleaningMode.Vac:
+        await this.robot.disableMopAsync();
+        await sleep();
+
+        await this.robot.setRouteModeAsync(this.activeRouteMode as RoborockRouteMode);
+        await sleep();
+
+        await this.robot.setSuctionModeAsync(this.activeSuctionMode as RoborockSuctionMode);
+        await sleep();
+        break;
+
+      case RoborockCleaningMode.VacAndMop:
+      default:
+        await this.robot.setMopModeAsync(this.activeMopMode as RoborockMopMode);
+        await sleep();
+
+        await this.robot.setRouteModeAsync(this.activeRouteMode as RoborockRouteMode);
+        await sleep();
+
+        await this.robot.setSuctionModeAsync(this.activeSuctionMode as RoborockSuctionMode);
+        await sleep();
+        break;
+    }
+  }
+
   private async onRunCleaning() {
     const delay = 100;
 
@@ -145,17 +185,8 @@ export class CustomCleaningPopup extends LitElement {
       localStorage.setItem('roborock_last_cleaning_mode', this.activeCleaningMode);
       // Save mop intensity for later reference (when vacuum shows 'off' in vac+mop mode)
       localStorage.setItem(`roborock_${this.robot.name}_last_mop_intensity`, this.activeMopMode);
-      
-      await this.robot.setSuctionModeAsync(this.activeSuctionMode as RoborockSuctionMode);
-      await new Promise(r => setTimeout(r, delay));
 
-      if (this.activeCleaningMode !== RoborockCleaningMode.Vac) {
-        await this.robot.setMopModeAsync(this.activeMopMode as RoborockMopMode);
-        await new Promise(r => setTimeout(r, delay));
-      }
-
-      await this.robot.setRouteModeAsync(this.activeRouteMode as RoborockRouteMode);
-      await new Promise(r => setTimeout(r, delay));
+      await this.applyCleaningSettings(delay);
 
       const area_ids = this.activeAreas.map(v => parseInt(v, 10));
       await this.robot.startSegmentsCleaningAsync(area_ids, parseInt(this.activeCycleMode, 10));
@@ -176,17 +207,8 @@ export class CustomCleaningPopup extends LitElement {
     try {
       // Save mop intensity for later reference (when vacuum shows 'off' in vac+mop mode)
       localStorage.setItem(`roborock_${this.robot.name}_last_mop_intensity`, this.activeMopMode);
-      
-      await this.robot.setSuctionModeAsync(this.activeSuctionMode as RoborockSuctionMode);
-      await new Promise(r => setTimeout(r, delay));
 
-      if (this.activeCleaningMode !== RoborockCleaningMode.Vac) {
-        await this.robot.setMopModeAsync(this.activeMopMode as RoborockMopMode);
-        await new Promise(r => setTimeout(r, delay));
-      }
-
-      await this.robot.setRouteModeAsync(this.activeRouteMode as RoborockRouteMode);
-      await new Promise(r => setTimeout(r, delay));
+      await this.applyCleaningSettings(delay);
 
       // Start cleaning without specifying areas (whole home)
       await this.robot.callServiceAsync('start');
