@@ -352,6 +352,11 @@ export class VacuumRobot {
       return Promise.resolve();
     }
 
+    if (targetValue === RoborockSuctionMode.OffRaiseMainBrush) {
+      return this.sendCommandAsync('set_custom_mode', [SUCTION_MODE_COMMANDS[RoborockSuctionMode.OffRaiseMainBrush]])
+        .catch(() => this.sendCommandAsync('set_custom_mode', [SUCTION_MODE_COMMANDS[RoborockSuctionMode.Off]]));
+    }
+
     return this.hass.callService('vacuum', 'set_fan_speed', {
       entity_id: this.entity_id,
       fan_speed: targetValue,

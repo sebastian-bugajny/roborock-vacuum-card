@@ -338,7 +338,7 @@ export class CustomCleaningPopup extends LitElement {
   }
 
   private renderRouteMode(): Template {
-    this.routeModes = this.robot.getAvailableRouteModes()
+    this.routeModes = this.getOrderedRouteModes()
       .map(v => ({ icon: getRouteIcon(v, 24, this.iconColor), value: v, disabled: !this.isSupportedRouteMode(v, this.activeCleaningMode) }));
     const mode = localize(`route_mode.${this.activeRouteMode}`);
 
@@ -458,6 +458,18 @@ export class CustomCleaningPopup extends LitElement {
     return preferredModes.find(mode => availableModes.includes(mode))
       ?? availableModes[0]
       ?? RoborockRouteMode.Standard;
+  }
+
+  private getOrderedRouteModes(): RoborockRouteMode[] {
+    const availableModes = this.robot?.getAvailableRouteModes?.() ?? [];
+    const preferredOrder = [
+      RoborockRouteMode.Fast,
+      RoborockRouteMode.Standard,
+      RoborockRouteMode.Deep,
+      RoborockRouteMode.DeepPlus,
+    ];
+
+    return preferredOrder.filter(mode => availableModes.includes(mode));
   }
 
   private isSupportedSuctionMode(mode: RoborockSuctionMode, cleaningMode: RoborockCleaningMode): boolean {
