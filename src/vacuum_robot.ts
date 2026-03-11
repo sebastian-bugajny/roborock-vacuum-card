@@ -352,7 +352,7 @@ export class VacuumRobot {
       return Promise.resolve();
     }
 
-    if (targetValue === RoborockSuctionMode.OffRaiseMainBrush) {
+    if ((targetValue as string) === RoborockSuctionMode.OffRaiseMainBrush) {
       return this.sendCommandAsync('set_custom_mode', [SUCTION_MODE_COMMANDS[RoborockSuctionMode.Off]]);
     }
 
@@ -362,9 +362,6 @@ export class VacuumRobot {
     }).catch(() => {
       const commandValue = SUCTION_MODE_COMMANDS[targetValue];
       return this.sendCommandAsync('set_custom_mode', [commandValue]).catch(() => {
-        if (targetValue === RoborockSuctionMode.OffRaiseMainBrush) {
-          return this.sendCommandAsync('set_custom_mode', [SUCTION_MODE_COMMANDS[RoborockSuctionMode.Off]]);
-        }
         throw new Error(`Unable to set suction mode: ${targetValue}`);
       });
     });
