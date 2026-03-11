@@ -357,7 +357,12 @@ export class VacuumRobot {
       fan_speed: targetValue,
     }).catch(() => {
       const commandValue = SUCTION_MODE_COMMANDS[targetValue];
-      return this.sendCommandAsync('set_custom_mode', [commandValue]);
+      return this.sendCommandAsync('set_custom_mode', [commandValue]).catch(() => {
+        if (targetValue === RoborockSuctionMode.OffRaiseMainBrush) {
+          return this.sendCommandAsync('set_custom_mode', [SUCTION_MODE_COMMANDS[RoborockSuctionMode.Off]]);
+        }
+        throw new Error(`Unable to set suction mode: ${targetValue}`);
+      });
     });
   }
 
