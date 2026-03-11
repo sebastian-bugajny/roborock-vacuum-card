@@ -274,7 +274,7 @@ export class CustomCleaningPopup extends LitElement {
           </div>
           <div class="content">
             <div class="parameters">
-              <segment-button-group primaryColor=${this.primaryColor} buttons=${this.cleaningModes} active=${this.activeCleaningMode} @select=${this.onCleaningModeChange}></segment-button-group>
+              <segment-button-group primaryColor=${this.primaryColor} .buttons=${this.cleaningModes} active=${this.activeCleaningMode} @select=${this.onCleaningModeChange}></segment-button-group>
               ${suctionMode}
               ${moppingMode}
               ${routeMode}
@@ -316,7 +316,7 @@ export class CustomCleaningPopup extends LitElement {
         <div class="title">${localize('common.suction_mode')}</div>
         <div class="value">${mode}</div>
       </div>
-      <segment-button-group primaryColor=${this.primaryColor} buttons=${this.suctionModes} active=${this.activeSuctionMode} @select=${this.onSuctionModeChange}></segment-button-group>
+      <segment-button-group primaryColor=${this.primaryColor} .buttons=${this.suctionModes} active=${this.activeSuctionMode} @select=${this.onSuctionModeChange}></segment-button-group>
     `;
   }
 
@@ -333,7 +333,7 @@ export class CustomCleaningPopup extends LitElement {
         <div class="title">${localize('common.mop_mode')}</div>
         <div class="value">${mode}</div>
       </div>
-      <segment-button-group primaryColor=${this.primaryColor} buttons=${this.mopModes} active=${this.activeMopMode} @select=${this.onMoppingModeChange}></segment-button-group>
+      <segment-button-group primaryColor=${this.primaryColor} .buttons=${this.mopModes} active=${this.activeMopMode} @select=${this.onMoppingModeChange}></segment-button-group>
     `;
   }
 
@@ -347,7 +347,7 @@ export class CustomCleaningPopup extends LitElement {
         <div class="title">${localize('common.route_mode')}</div>
         <div class="value">${mode}</div>
       </div>
-      <segment-button-group primaryColor=${this.primaryColor} buttons=${this.routeModes} active=${this.activeRouteMode} @select=${this.onRouteModeChange}></segment-button-group>
+      <segment-button-group primaryColor=${this.primaryColor} .buttons=${this.routeModes} active=${this.activeRouteMode} @select=${this.onRouteModeChange}></segment-button-group>
     `;
   }
 
@@ -362,7 +362,7 @@ export class CustomCleaningPopup extends LitElement {
         <div class="title">${localize('common.cycle_mode')}</div>
         <div class="value">x${this.activeCycleMode}</div>
       </div>
-      <segment-button-group primaryColor=${this.primaryColor} buttons=${cycleModes} active=${this.activeCycleMode} @select=${this.onCycleModeChange}></segment-button-group>
+      <segment-button-group primaryColor=${this.primaryColor} .buttons=${cycleModes} active=${this.activeCycleMode} @select=${this.onCycleModeChange}></segment-button-group>
     `;
   }
 
