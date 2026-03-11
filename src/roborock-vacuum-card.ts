@@ -396,7 +396,7 @@ export class RoborockVacuumCard extends LitElement {
     // - Mop-only: suction is Off AND (mop is not Off OR route is Deep/DeepPlus)
     // - Vac-only: suction is MaxPlus
     // - VacAndMop: everything else where both are active
-    const isMopOnly = suction === RoborockSuctionMode.Off && 
+    const isMopOnly = [RoborockSuctionMode.Off, RoborockSuctionMode.OffRaiseMainBrush].includes(suction) && 
                       (mop !== RoborockMopMode.Off || 
                        route === RoborockRouteMode.Deep || 
                        route === RoborockRouteMode.DeepPlus);

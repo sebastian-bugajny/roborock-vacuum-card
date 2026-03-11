@@ -7,6 +7,11 @@ import {
   HassEntity,
 } from './types'
 
+const OFF_SUCTION_MODES = [RoborockSuctionMode.Off, RoborockSuctionMode.OffRaiseMainBrush];
+const INTEGRATION_MOP_MODES = ['off', 'slight', 'low', 'medium', 'moderate', 'high', 'extreme'] as const;
+const NON_OFF_MOP_MODES = ['slight', 'low', 'medium', 'moderate', 'high', 'extreme'] as const;
+const APP_VISIBLE_MOP_MODES = [RoborockMopMode.Low, RoborockMopMode.Medium, RoborockMopMode.High];
+
 export class VacuumRobot {
   private hass!: MyHomeAssistant;
   private entity_id!: string;
@@ -24,7 +29,7 @@ export class VacuumRobot {
       case RoborockCleaningMode.Vac:
         return [RoborockSuctionMode.Quiet, RoborockSuctionMode.Balanced, RoborockSuctionMode.Turbo, RoborockSuctionMode.Max, RoborockSuctionMode.MaxPlus].includes(mode);
       case RoborockCleaningMode.Mop:
-        return mode == RoborockSuctionMode.Off;
+        return OFF_SUCTION_MODES.includes(mode);
     }
   }
 
@@ -32,7 +37,7 @@ export class VacuumRobot {
     switch (cleaningMode) {
       case RoborockCleaningMode.VacAndMop:
       case RoborockCleaningMode.Mop:
-        return [RoborockMopMode.Low, RoborockMopMode.Medium, RoborockMopMode.High].includes(mode);
+        return APP_VISIBLE_MOP_MODES.includes(mode);
       case RoborockCleaningMode.Vac:
         return mode == RoborockMopMode.Off;
     }
@@ -68,6 +73,43 @@ export class VacuumRobot {
     this.mop_mode_entity = entity;
   }
 
+  public getAvailableSuctionModes(): RoborockSuctionMode[] {
+    const entity = this.hass?.states?.[this.entity_id];
+    const options = entity?.attributes?.fan_speed_list;
+    const normalized = this.normalizeOptions(options, Object.values(RoborockSuctionMode));
+    return normalized.length ? normalized : Object.values(RoborockSuctionMode);
+  }
+
+  private getAvailableMopModeOptions(): string[] {
+    const entityId = this.mop_intensity_entity ?? `select.${this.name}_mop_intensity`;
+    const entity = this.hass?.states?.[entityId];
+    const options = entity?.attributes?.options;
+    const normalized = this.normalizeOptions(options, [...INTEGRATION_MOP_MODES]);
+    return normalized.length ? normalized : [...INTEGRATION_MOP_MODES];
+  }
+
+  public getVisibleMopModes(): RoborockMopMode[] {
+    return APP_VISIBLE_MOP_MODES;
+  }
+
+  public getAvailableRouteModes(): RoborockRouteMode[] {
+    const entityId = this.mop_mode_entity ?? `select.${this.name}_mop_mode`;
+    const entity = this.hass?.states?.[entityId];
+    const options = entity?.attributes?.options;
+    const normalized = this.normalizeOptions(options, Object.values(RoborockRouteMode));
+    return normalized.length ? normalized : Object.values(RoborockRouteMode);
+  }
+
+  public getPreferredMopOnlySuctionMode(): RoborockSuctionMode {
+    const availableModes = this.getAvailableSuctionModes();
+    if (availableModes.includes(RoborockSuctionMode.OffRaiseMainBrush)) {
+      return RoborockSuctionMode.OffRaiseMainBrush;
+    }
+    return availableModes.includes(RoborockSuctionMode.Off)
+      ? RoborockSuctionMode.Off
+      : RoborockSuctionMode.OffRaiseMainBrush;
+  }
+
   public getSuctionMode(): RoborockSuctionMode {
     if (!this.hass || !this.entity_id) {
       return RoborockSuctionMode.Turbo; // Default value
@@ -97,6 +139,55 @@ export class VacuumRobot {
     this.lastMopIntensity = intensity;
   }
 
+  private normalizeOptions<T extends string>(options: unknown, validValues: T[]): T[] {
+    if (!Array.isArray(options)) {
+      return [];
+    }
+
+    const validOptions = new Set(validValues);
+    return options
+      .map(option => `${option}`.toLowerCase())
+      .filter((option): option is T => validOptions.has(option as T));
+  }
+
+  private resolveSupportedMopMode(value: RoborockMopMode): RoborockMopMode | null {
+    const availableModes = this.getAvailableMopModeOptions();
+    if (availableModes.includes(value)) {
+      return value;
+    }
+
+    if (value === RoborockMopMode.Off) {
+      return null;
+    }
+
+    const fallbackMap: Record<RoborockMopMode, string[]> = {
+      [RoborockMopMode.Off]: [],
+      [RoborockMopMode.Low]: [RoborockMopMode.Low, 'slight', RoborockMopMode.Medium],
+      [RoborockMopMode.Medium]: ['moderate', RoborockMopMode.Medium, RoborockMopMode.Low, RoborockMopMode.High],
+      [RoborockMopMode.High]: ['extreme', RoborockMopMode.High, 'moderate', RoborockMopMode.Medium],
+    };
+
+    const matchedMode = fallbackMap[value].find(mode => availableModes.includes(mode));
+    return matchedMode ? (matchedMode as RoborockMopMode) : null;
+  }
+
+  private normalizeMopModeForDisplay(value: string): RoborockMopMode {
+    switch (value) {
+      case 'slight':
+      case RoborockMopMode.Low:
+        return RoborockMopMode.Low;
+      case 'moderate':
+      case RoborockMopMode.Medium:
+        return RoborockMopMode.Medium;
+      case 'extreme':
+      case RoborockMopMode.High:
+        return RoborockMopMode.High;
+      case RoborockMopMode.Off:
+      default:
+        return value as RoborockMopMode;
+    }
+  }
+
   public getMopMode(): RoborockMopMode {
     if (!this.hass || !this.entity_id) {
       return RoborockMopMode.High; // Default value
@@ -117,14 +208,14 @@ export class VacuumRobot {
     // If value is vac_followed_by_mop or mop_after_vac, return last known intensity
     if (currentValue === 'vac_followed_by_mop' || currentValue === 'mop_after_vac') {
       // If we don't have a stored value, default to medium
-      return this.lastMopIntensity || RoborockMopMode.Medium;
+      return this.normalizeMopModeForDisplay(this.lastMopIntensity || RoborockMopMode.Medium);
     }
     
     // Extract intensity from vac_and_mop_* values (e.g., "vac_and_mop_high" -> "high")
     if (currentValue.startsWith('vac_and_mop_')) {
       const intensity = currentValue.replace('vac_and_mop_', '') as RoborockMopMode;
       this.storeLastMopIntensity(intensity);
-      return intensity;
+      return this.normalizeMopModeForDisplay(intensity);
     }
     
     // If mop_intensity is 'off', check vacuum entity's mop_intensity attribute
@@ -133,20 +224,20 @@ export class VacuumRobot {
       const vacuumEntity = this.hass.states[this.entity_id];
       const vacuumMopIntensity = vacuumEntity?.attributes?.mop_intensity;
       if (vacuumMopIntensity && vacuumMopIntensity !== 'off') {
-        const intensity = vacuumMopIntensity.toLowerCase() as RoborockMopMode;
+        const intensity = vacuumMopIntensity.toLowerCase();
         this.storeLastMopIntensity(intensity);
-        return intensity;
+        return this.normalizeMopModeForDisplay(intensity);
       }
       // If no valid intensity in vacuum attributes, return last known value or off
-      return this.lastMopIntensity || RoborockMopMode.Off;
+      return this.normalizeMopModeForDisplay(this.lastMopIntensity || RoborockMopMode.Off);
     }
     
     // If it's a valid intensity value, store it for later
-    if (currentValue === 'low' || currentValue === 'medium' || currentValue === 'high') {
-      this.storeLastMopIntensity(currentValue as RoborockMopMode);
+    if (NON_OFF_MOP_MODES.includes(currentValue as typeof NON_OFF_MOP_MODES[number])) {
+      this.storeLastMopIntensity(this.normalizeMopModeForDisplay(currentValue));
     }
     
-    return entity.state as RoborockMopMode;
+    return this.normalizeMopModeForDisplay(entity.state);
   }
 
   // Check if mop is active based on multiple sensors
@@ -221,9 +312,25 @@ export class VacuumRobot {
     if (!this.hass || !this.entity_id) {
       return Promise.reject('Robot not initialized');
     }
+
+    const availableModes = this.getAvailableSuctionModes();
+    let targetValue = value;
+
+    if (!availableModes.includes(targetValue) && value === RoborockSuctionMode.Off) {
+      targetValue = this.getPreferredMopOnlySuctionMode();
+    }
+
+    if (!availableModes.includes(targetValue) && value === RoborockSuctionMode.OffRaiseMainBrush && availableModes.includes(RoborockSuctionMode.Off)) {
+      targetValue = RoborockSuctionMode.Off;
+    }
+
+    if (!availableModes.includes(targetValue)) {
+      return Promise.resolve();
+    }
+
     return this.hass.callService('vacuum', 'set_fan_speed', {
       entity_id: this.entity_id,
-      fan_speed: value,
+      fan_speed: targetValue,
     });
   }
 
@@ -231,10 +338,16 @@ export class VacuumRobot {
     if (!this.hass || !this.entity_id) {
       return Promise.reject('Robot not initialized');
     }
+
+    const targetValue = this.resolveSupportedMopMode(value);
+    if (!targetValue) {
+      return Promise.resolve();
+    }
+
     const entityId = this.mop_intensity_entity ?? `select.${this.name}_mop_intensity`;
     return this.hass.callService('select', 'select_option', {
       entity_id: entityId,
-      option: value,
+      option: targetValue,
     });
   }
 

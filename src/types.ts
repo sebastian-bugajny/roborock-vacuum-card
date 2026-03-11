@@ -40,6 +40,7 @@ export enum RoborockCleaningMode {
 }
 export enum RoborockSuctionMode {
   Off = 'off',
+  OffRaiseMainBrush = 'off_raise_main_brush',
   Quiet = 'quiet',
   Balanced = 'balanced',
   Turbo = 'turbo',
