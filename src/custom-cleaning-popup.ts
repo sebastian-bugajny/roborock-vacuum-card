@@ -201,6 +201,7 @@ export class CustomCleaningPopup extends LitElement {
 
   private async onCleanAll() {
     const delay = 100;
+    const repeat = parseInt(this.activeCycleMode, 10);
 
     this.popupRequestInProgress = true;
 
@@ -210,8 +211,21 @@ export class CustomCleaningPopup extends LitElement {
 
       await this.applyCleaningSettings(delay);
 
-      // Start cleaning without specifying areas (whole home)
-      await this.robot.callServiceAsync('start');
+      // Home Assistant does not expose a generic whole-home repeat counter.
+      // When the user requests x2 and areas are configured in the card, emulate
+      // "clean all" by starting segment cleaning for all configured areas.
+      if (repeat > 1) {
+        const allAreaIds = this.getAllConfiguredAreaIds();
+
+        if (allAreaIds.length > 0) {
+          await this.robot.startSegmentsCleaningAsync(allAreaIds, repeat);
+        } else {
+          await this.robot.callServiceAsync('start');
+        }
+      } else {
+        // Start cleaning without specifying areas (whole home)
+        await this.robot.callServiceAsync('start');
+      }
 
       this.closePopup();
     } catch (error) {
@@ -241,6 +255,12 @@ export class CustomCleaningPopup extends LitElement {
   private closePopup() {
     this.activeAreas = [];
     this.dispatchEvent(new CustomEvent('close'));
+  }
+
+  private getAllConfiguredAreaIds(): number[] {
+    return this.areas
+      .map(area => area.roborock_area_id)
+      .filter((areaId, index, array) => array.indexOf(areaId) === index);
   }
 
   render(): Template {
