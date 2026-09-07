@@ -52,7 +52,8 @@
   },
   "error": {
     "invalid_config": "Invalid configuration",
-    "missing_entity": "Specifying entity is required!"
+    "missing_entity": "Specifying entity is required!",
+    "entity_not_found": "Entity {entity} not found"
   },
   "vacuum_error": {
     "battery_error": "Battery error",

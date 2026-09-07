@@ -146,6 +146,11 @@ export class RoborockVacuumCard extends LitElement {
     if (!this.hass || !this.config)
       return nothing;
 
+    // A missing vacuum entity is a config mistake, not a reason to throw on
+    // every state update - say so instead.
+    if (!this.hass.states[this.config.entity])
+      return this.renderMissingEntity();
+
     this.iconColor = getComputedStyle(document.documentElement)
       .getPropertyValue("--state-icon-color")
       .trim();
@@ -187,6 +192,16 @@ export class RoborockVacuumCard extends LitElement {
         </div>
       </ha-card>
       ${popup}
+    `;
+  }
+
+  private renderMissingEntity(): Template {
+    return html`
+      <ha-card>
+        <div class="errors">
+          ${localize('error.entity_not_found', '{entity}', this.config.entity)}
+        </div>
+      </ha-card>
     `;
   }
 
@@ -529,17 +544,22 @@ export class RoborockVacuumCard extends LitElement {
     return areas;
   }
 
-  private getAttributeValue(entity: HassEntity, attribute: string): string | undefined {
-    return entity.attributes[attribute];
+  private getAttributeValue(entity: HassEntity | undefined, attribute: string): string | undefined {
+    return entity?.attributes?.[attribute];
   }
 
   private state(id: string): string | undefined {
     return this.hass.states[id]?.state;
   }
 
-  static getStubConfig() {
+  /** Called by the card picker - offer a vacuum that actually exists. */
+  static getStubConfig(hass?: MyHomeAssistant) {
+    const vacuum = hass
+      ? Object.keys(hass.states).find(entityId => entityId.startsWith('vacuum.'))
+      : undefined;
+
     return {
-      entity: 'vacuum.robot',
+      entity: vacuum ?? 'vacuum.robot',
       stats: {},
     };
   }

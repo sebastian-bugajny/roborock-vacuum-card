@@ -52,7 +52,8 @@
   },
   "error": {
     "invalid_config": "Nieprawidłowa konfiguracja",
-    "missing_entity": "Specifying entity is required!"
+    "missing_entity": "Podanie encji jest wymagane!",
+    "entity_not_found": "Nie znaleziono encji {entity}"
   },
   "vacuum_error": {
     "battery_error": "Błąd baterii",

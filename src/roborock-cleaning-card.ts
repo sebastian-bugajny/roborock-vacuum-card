@@ -60,6 +60,18 @@ export class RoborockCleaningCard extends LitElement {
       return nothing;
     }
 
+    // Without the vacuum entity the panel would render but every action would
+    // silently do nothing.
+    if (!this.hass.states[this.config.entity]) {
+      return html`
+        <ha-card>
+          <div style="padding: 16px;">
+            ${localize('error.entity_not_found', '{entity}', this.config.entity)}
+          </div>
+        </ha-card>
+      `;
+    }
+
     // Ensure robot has hass before rendering
     if (this.robot && this.hass) {
       this.robot.setHass(this.hass as any);
@@ -115,9 +127,14 @@ export class RoborockCleaningCard extends LitElement {
     return 3;
   }
 
-  static getStubConfig() {
+  /** Called by the card picker - offer a vacuum that actually exists. */
+  static getStubConfig(hass?: HomeAssistant) {
+    const vacuum = hass
+      ? Object.keys(hass.states).find(entityId => entityId.startsWith('vacuum.'))
+      : undefined;
+
     return {
-      entity: 'vacuum.robot',
+      entity: vacuum ?? 'vacuum.robot',
       areas: []
     };
   }
