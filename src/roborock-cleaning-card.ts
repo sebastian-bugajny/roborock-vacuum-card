@@ -5,6 +5,8 @@ import type { HomeAssistant } from 'custom-card-helpers';
 import { VacuumRobot } from './vacuum_robot';
 import localize from './localize';
 import { CustomCleaningPopup } from './custom-cleaning-popup';
+import { RoborockRoomSource } from './room-source';
+import { MyHomeAssistant, RoborockArea } from './types';
 
 // Register custom cleaning popup
 typeof CustomCleaningPopup;
@@ -22,6 +24,8 @@ export class RoborockCleaningCard extends LitElement {
 
   @state()
   private iconColor: string = '#fff';
+
+  private roomSource: RoborockRoomSource = new RoborockRoomSource();
 
   constructor() {
     super();
@@ -42,6 +46,7 @@ export class RoborockCleaningCard extends LitElement {
     }
 
     this.config = config;
+    this.roomSource.setVacuumEntity(config.entity);
     this.robot.setEntity(config.entity);
     this.robot.setMopIntensityEntity(config.mop_intensity_entity);
     this.robot.setMopModeEntity(config.mop_mode_entity);
@@ -77,6 +82,8 @@ export class RoborockCleaningCard extends LitElement {
       this.robot.setHass(this.hass as any);
     }
 
+    this.syncRooms();
+
     // Get icon color
     this.iconColor = getComputedStyle(document.documentElement)
       .getPropertyValue("--state-icon-color")
@@ -98,8 +105,26 @@ export class RoborockCleaningCard extends LitElement {
     `;
   }
 
-  private getAreas() {
-    const areas: any[] = [];
+  /** See the main card: configured `areas` win, otherwise rooms are discovered. */
+  private getAreas(): RoborockArea[] {
+    return this.config.areas?.length
+      ? this.getConfiguredAreas()
+      : this.roomSource.getAreas();
+  }
+
+  private syncRooms(): void {
+    if (this.config.areas?.length)
+      return;
+
+    this.roomSource.setHass(this.hass as MyHomeAssistant);
+    this.roomSource.sync().then(changed => {
+      if (changed)
+        this.requestUpdate();
+    });
+  }
+
+  private getConfiguredAreas(): RoborockArea[] {
+    const areas: RoborockArea[] = [];
 
     if (!this.config.areas)
       return areas;

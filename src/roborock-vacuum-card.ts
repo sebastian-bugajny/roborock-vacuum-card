@@ -8,6 +8,7 @@ import buildConfig from './config'
 import localize from './localize';
 import { VacuumRobot } from './vacuum_robot'
 import { RoborockEntityResolver, resolveEntity, ResolvableEntity } from './entity-resolver'
+import { RoborockRoomSource } from './room-source'
 import {
   Template,
   RoborockArea,
@@ -49,6 +50,7 @@ export class RoborockVacuumCard extends LitElement {
   private iconColor: string = '#000';
   private robot!: VacuumRobot;
   private resolver: RoborockEntityResolver = new RoborockEntityResolver();
+  private roomSource: RoborockRoomSource = new RoborockRoomSource();
 
   get name(): string {
     return this.config.entity.replace('vacuum.', '');
@@ -105,6 +107,7 @@ export class RoborockVacuumCard extends LitElement {
   setConfig(config: RoborockVacuumCardConfig) {
     this.config = buildConfig(config);
     this.resolver.setVacuumEntity(this.config.entity);
+    this.roomSource.setVacuumEntity(this.config.entity);
     this.robot.setEntity(this.config.entity);
     this.robot.setMopIntensityEntity(this.config.mop_intensity_entity);
     this.robot.setMopModeEntity(this.config.mop_mode_entity);
@@ -157,6 +160,7 @@ export class RoborockVacuumCard extends LitElement {
       .trim();
     this.robot.setHass(this.hass);
     this.resolver.setHass(this.hass);
+    this.syncRooms();
 
     const isCleaning = this.entity('cleaning')?.state == 'on';
     const state = this.state(this.config.entity);
@@ -551,7 +555,33 @@ export class RoborockVacuumCard extends LitElement {
     );
   }
 
-  private getAreas() {
+  /**
+   * Keeps the discovered room list up to date. Fire and forget: a change
+   * triggers a re-render, and a failure leaves the previous rooms in place.
+   */
+  private syncRooms(): void {
+    if (this.config.areas?.length)
+      return;
+
+    this.roomSource.setHass(this.hass);
+    this.roomSource.sync().then(changed => {
+      if (changed)
+        this.requestUpdate();
+    });
+  }
+
+  /**
+   * Rooms for the custom cleaning panel. A configured `areas` list wins, so
+   * existing configs and hand-picked room sets keep working; otherwise the
+   * rooms are discovered from the robot.
+   */
+  private getAreas(): RoborockArea[] {
+    return this.config.areas?.length
+      ? this.getConfiguredAreas()
+      : this.roomSource.getAreas();
+  }
+
+  private getConfiguredAreas(): RoborockArea[] {
     const areas: RoborockArea[] = [];
 
     if (!this.config.areas)

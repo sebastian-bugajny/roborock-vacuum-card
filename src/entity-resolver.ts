@@ -136,6 +136,8 @@ export const ENTITY_SPECS = {
   mopDryingRemainingTime: { domain: 'sensor', translationKey: 'mop_drying_remaining_time', onDock: true },
   mopIntensity: { domain: 'select', translationKey: 'mop_intensity', onDock: false },
   mopMode: { domain: 'select', translationKey: 'mop_mode', onDock: false },
+  currentRoom: { domain: 'sensor', translationKey: 'current_room', onDock: false },
+  selectedMap: { domain: 'select', translationKey: 'selected_map', onDock: false },
   filterTimeLeft: { domain: 'sensor', translationKey: 'filter_time_left', onDock: false },
   sideBrushTimeLeft: { domain: 'sensor', translationKey: 'side_brush_time_left', onDock: false },
   mainBrushTimeLeft: { domain: 'sensor', translationKey: 'main_brush_time_left', onDock: false },

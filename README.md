@@ -156,12 +156,26 @@ optional.
 
 #### `areas`
 - **Type:** `array`
-- **Optional**
-- **Description:** List of rooms/areas available for custom cleaning. Each area requires:
-  - `area_id` - Home Assistant area identifier
-  - `roborock_area_id` - Internal Roborock area ID (numeric)
+- **Optional - and normally not needed**
 
-**Example:**
+Rooms in the custom cleaning panel are discovered from the robot through the
+`roborock.get_maps` service, which reports every room of every map together with its
+internal segment ID. That means:
+
+- no room has to be listed in the config, and no segment ID has to be looked up,
+- a room added in the Roborock app shows up on its own, because the card re-reads the
+  list whenever the vacuum reports different rooms or a different map,
+- only rooms of the currently selected map are offered,
+- a room gets an icon if a Home Assistant area with the same name has one.
+
+The service only reads data the Roborock integration has already polled, so discovery
+costs no request to the robot.
+
+Set `areas` to take over from discovery - to offer a subset of rooms, force an order, or
+rename them. Each entry needs:
+  - `area_id` - Home Assistant area, used for the label and icon
+  - `roborock_area_id` - the room's segment ID
+
 ```yaml
 areas:
   - area_id: living_room
@@ -169,6 +183,9 @@ areas:
   - area_id: kitchen
     roborock_area_id: 2
 ```
+
+To read the segment IDs of your own robot, call `roborock.get_maps` in
+**Developer tools → Actions** with your vacuum as the target.
 
 ### Stats Configuration Options
 
@@ -222,7 +239,8 @@ areas:
 #### Configuration Options
 
 - `entity` - **Required** - Vacuum entity ID
-- `areas` - **Required** - List of rooms/areas to clean
+- `areas` - Optional - List of rooms to clean; left out, the rooms are discovered from the
+  robot (see the `areas` section of the vacuum card above)
   - `area_id` - Area identifier for translation (e.g., `salon`, `kuchnia`)
   - `roborock_area_id` - Roborock's internal area ID
 - `mop_intensity_entity` - Optional - Custom entity name for mop intensity control
