@@ -7,7 +7,7 @@ import styles from './styles.css';
 import buildConfig from './config'
 import localize from './localize';
 import { VacuumRobot } from './vacuum_robot'
-import { RoborockEntityResolver } from './entity-resolver'
+import { RoborockEntityResolver, resolveEntity, ResolvableEntity } from './entity-resolver'
 import {
   Template,
   RoborockArea,
@@ -53,10 +53,17 @@ export class RoborockVacuumCard extends LitElement {
     return this.config.entity.replace('vacuum.', '');
   }
 
+  /**
+   * Guessed entity IDs, used only as a last resort. Home Assistant derives an
+   * entity ID from the device name when the entity is first created, so these
+   * break on rename, on a non-English setup, and for entities the integration
+   * added later than the device - prefer `entityId()`, which asks the registry.
+   */
   get sensor(): RoborockSensorIds {
     const name = this.name;
     const defaults = {
       cleaning: `binary_sensor.${name}_cleaning`,
+      status: `sensor.${name}_status`,
       mopDrying: `binary_sensor.${name}_dock_mop_drying`,
       mopDryingSwitch: `switch.${name}_dock_mop_drying`,
       mopDryingRemainingTime: `sensor.${name}_dock_mop_drying_remaining_time`,
@@ -67,6 +74,22 @@ export class RoborockVacuumCard extends LitElement {
 
     // Merge with custom sensor IDs from config
     return { ...defaults, ...(this.config?.sensors || {}) };
+  }
+
+  /**
+   * Resolves one of the card's entities: an explicit config override wins, then
+   * the entity registry, then the guessed ID.
+   */
+  private entityId(field: ResolvableEntity & keyof RoborockSensorIds): string | undefined {
+    return this.config?.sensors?.[field]
+      ?? resolveEntity(this.resolver, field)
+      ?? this.sensor[field];
+  }
+
+  /** The state object of one of the card's entities, if it exists. */
+  private entity(field: ResolvableEntity & keyof RoborockSensorIds): HassEntity | undefined {
+    const id = this.entityId(field);
+    return id ? this.hass.states[id] : undefined;
   }
 
   static get styles(): CSSResultGroup {
@@ -99,30 +122,13 @@ export class RoborockVacuumCard extends LitElement {
   }
 
   protected shouldUpdate(changedProps: Map<string, any>): boolean {
-    // Always update when hass changes - this ensures we react to entity state changes
+    // The card reads a dozen entities across two devices, several of them
+    // resolved at render time, so there is no cheap subset to diff here - any
+    // hass change is treated as relevant.
     if (changedProps.has('hass')) {
-      const oldHass = changedProps.get('hass') as MyHomeAssistant | undefined;
-      const newHass = this.hass;
-      
-      if (oldHass && newHass) {
-        // Check if any relevant entities changed
-        const mopIntensityEntity = this.config?.mop_intensity_entity ?? `select.${this.name}_mop_intensity`;
-        const mopModeEntity = this.config?.mop_mode_entity ?? `select.${this.name}_mop_mode`;
-        const vacuumEntity = this.config?.entity;
-        
-        const mopIntensityChanged = oldHass.states[mopIntensityEntity]?.state !== newHass.states[mopIntensityEntity]?.state;
-        const mopModeChanged = oldHass.states[mopModeEntity]?.state !== newHass.states[mopModeEntity]?.state;
-        const vacuumChanged = oldHass.states[vacuumEntity]?.state !== newHass.states[vacuumEntity]?.state ||
-                             oldHass.states[vacuumEntity]?.attributes?.fan_speed !== newHass.states[vacuumEntity]?.attributes?.fan_speed;
-        
-        if (mopIntensityChanged || mopModeChanged || vacuumChanged) {
-          return true;
-        }
-      }
-      
       return true;
     }
-    
+
     return super.shouldUpdate(changedProps);
   }
 
@@ -146,7 +152,7 @@ export class RoborockVacuumCard extends LitElement {
     this.robot.setHass(this.hass);
     this.resolver.setHass(this.hass);
 
-    const isCleaning = this.state(this.sensor.cleaning) == 'on';
+    const isCleaning = this.entity('cleaning')?.state == 'on';
     const state = this.state(this.config.entity);
     const combinedState = this.renderState(state);
     const errors = this.renderErrors();
@@ -185,11 +191,11 @@ export class RoborockVacuumCard extends LitElement {
   }
 
   private renderState(state: string | undefined) {
-    const reachStatusSensor = this._getExistingSensorId([`sensor.${this.name}_status`]);
-    if (!reachStatusSensor)
+    const reachStatusEntity = this.entity('status');
+    if (!reachStatusEntity)
       return localize(`status.${state}`);
 
-    const reachState = this.state(reachStatusSensor);
+    const reachState = reachStatusEntity.state;
     return state == reachState
       ? localize(`status.${state}`)
       : localize(`status.${state}`) + '. ' + localize(`reach_status.${reachState}`) + '.';
@@ -224,6 +230,8 @@ export class RoborockVacuumCard extends LitElement {
         .areas=${areas}
         iconColor=${this.iconColor}
         .inline=${inline}
+        .defaultMode=${this.config.default_mode}
+        .defaultModes=${this.config.default_modes}
         @close=${this.onPopupClose}>
       </custom-cleaning-popup>
     `;
@@ -233,13 +241,13 @@ export class RoborockVacuumCard extends LitElement {
     if (!this.hass || !this.config)
       return nothing;
 
-    const vacuumErrorSensor = this.sensor.vacuumError;
-    const dockErrorSensor = this.sensor.dockError;
+    const vacuumErrorEntity = this.entity('vacuumError');
+    const dockErrorEntity = this.entity('dockError');
 
     let isVacuumError = false;
     let vacuum: Template = nothing;
-    if (vacuumErrorSensor && this.hass.states[vacuumErrorSensor]) {
-      const rawVacuumError = this.state(vacuumErrorSensor);
+    if (vacuumErrorEntity) {
+      const rawVacuumError = vacuumErrorEntity.state;
       const vacuumError = `vacuum_error.${rawVacuumError}`;
 
       // vacuum_error: 'none' means no error
@@ -250,8 +258,8 @@ export class RoborockVacuumCard extends LitElement {
 
     let isDocError = false;
     let doc: Template = nothing;
-    if (dockErrorSensor && this.hass.states[dockErrorSensor]) {
-      const rawDocError = this.state(dockErrorSensor);
+    if (dockErrorEntity) {
+      const rawDocError = dockErrorEntity.state;
       const docError = `doc_error.${rawDocError}`;
 
       // dock_error: 'ok' means no error
@@ -431,31 +439,11 @@ export class RoborockVacuumCard extends LitElement {
     `;
   }
 
-  /**
-   * Picks the first entity that actually exists, so that an explicit config
-   * override always wins over a default or a registry lookup.
-   */
-  private firstAvailable(...entityIds: (string | undefined)[]): HassEntity | undefined {
-    for (const entityId of entityIds) {
-      const entity = entityId ? this.hass.states[entityId] : undefined;
-      if (entity)
-        return entity;
-    }
-
-    return undefined;
-  }
-
   private renderMopDrying(): Template {
     // The mop drying binary sensor is deprecated and stops working in HA
-    // 2027.3.0. The switch that replaced it reports the same state, but it was
-    // created later, so its entity ID may carry a different prefix than the
-    // vacuum - hence the registry lookup before the ID-based defaults.
-    const mopDryingEntity = this.firstAvailable(
-      this.config.sensors?.mopDryingSwitch,
-      this.resolver.find('switch', 'mop_drying', true),
-      this.sensor.mopDryingSwitch,
-      this.sensor.mopDrying,
-    );
+    // 2027.3.0. The switch that replaced it reports the same state, so prefer
+    // it and keep the binary sensor only for older integrations.
+    const mopDryingEntity = this.entity('mopDryingSwitch') ?? this.entity('mopDrying');
     if (!mopDryingEntity)
       return nothing;
 
@@ -463,11 +451,7 @@ export class RoborockVacuumCard extends LitElement {
     if (isDrying != 'on')
       return nothing;
 
-    const mopDryingTimeEntity = this.firstAvailable(
-      this.config.sensors?.mopDryingRemainingTime,
-      this.sensor.mopDryingRemainingTime,
-      this.resolver.find('sensor', 'mop_drying_remaining_time', true),
-    );
+    const mopDryingTimeEntity = this.entity('mopDryingRemainingTime');
     if (!mopDryingTimeEntity)
       return nothing;
 
@@ -486,7 +470,7 @@ export class RoborockVacuumCard extends LitElement {
   }
 
   private renderBattery(): Template {
-    const entity = this.hass.states[this.sensor.battery];
+    const entity = this.entity('battery');
 
     if (!entity) {
       return html``;
@@ -497,7 +481,7 @@ export class RoborockVacuumCard extends LitElement {
     const unit = entity.attributes.unit_of_measurement || (Number.isFinite(n) ? '%' : '');
 
     return html`
-    <div class="tip" @click="${() => this.handleMore(this.sensor.battery)}">
+    <div class="tip" @click="${() => this.handleMore(entity.entity_id)}">
       <state-badge class="battery-badge" .hass=${this.hass} .stateObj=${entity}></state-badge>
       <span class="icon-title">${value}${unit}</span>
     </div>
@@ -545,18 +529,34 @@ export class RoborockVacuumCard extends LitElement {
     return areas;
   }
 
-  _getExistingSensorId(sensorIds: string[]): string | undefined {
-    for (let sensorId of sensorIds) {
-      if (this.hass.states[sensorId])
-        return sensorId;
-    }
-  }
-
   private getAttributeValue(entity: HassEntity, attribute: string): string | undefined {
     return entity.attributes[attribute];
   }
 
   private state(id: string): string | undefined {
     return this.hass.states[id]?.state;
+  }
+
+  static getStubConfig() {
+    return {
+      entity: 'vacuum.robot',
+      stats: {},
+    };
+  }
+}
+
+// Register card in customCards so it shows up in the "Add card" picker
+(window as any).customCards = (window as any).customCards || [];
+(window as any).customCards.push({
+  type: 'roborock-vacuum-card',
+  name: 'Roborock Vacuum Card',
+  description: 'Status, modes and custom cleaning for Roborock vacuums',
+  preview: false,
+  documentationURL: 'https://github.com/sebastian-bugajny/roborock-vacuum-card',
+});
+
+declare global {
+  interface HTMLElementTagNameMap {
+    'roborock-vacuum-card': RoborockVacuumCard;
   }
 }

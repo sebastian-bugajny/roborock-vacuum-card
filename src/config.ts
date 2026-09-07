@@ -40,8 +40,22 @@ export default function buildConfig(
     entity: config.entity,
     stats: config.stats ?? {},
     areas: config.areas ?? [],
-    default_mode: RoborockCleaningMode.VacAndMop,
-    default_modes: { ...config.default_modes, ...default_modes },
+    default_mode: config.default_mode ?? RoborockCleaningMode.VacAndMop,
+    // Config wins over the built-in defaults, per mode.
+    default_modes: {
+      [RoborockCleaningMode.VacAndMop]: {
+        ...default_modes[RoborockCleaningMode.VacAndMop],
+        ...config.default_modes?.[RoborockCleaningMode.VacAndMop],
+      },
+      [RoborockCleaningMode.Mop]: {
+        ...default_modes[RoborockCleaningMode.Mop],
+        ...config.default_modes?.[RoborockCleaningMode.Mop],
+      },
+      [RoborockCleaningMode.Vac]: {
+        ...default_modes[RoborockCleaningMode.Vac],
+        ...config.default_modes?.[RoborockCleaningMode.Vac],
+      },
+    },
     mop_intensity_entity: config.mop_intensity_entity,
     mop_mode_entity: config.mop_mode_entity,
     show_custom_cleaning_inline: config.show_custom_cleaning_inline ?? false,

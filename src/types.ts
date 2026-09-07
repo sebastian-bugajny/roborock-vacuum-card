@@ -137,6 +137,7 @@ export interface RoborockCleaningCardConfig {
 
 export interface RoborockSensorIds {
   cleaning: string;
+  status: string;
   /** Deprecated in HA 2027.3.0, kept as a fallback for older Roborock integrations. */
   mopDrying: string;
   mopDryingSwitch: string;

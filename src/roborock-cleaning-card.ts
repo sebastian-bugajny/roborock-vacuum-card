@@ -1,6 +1,6 @@
 import { html, LitElement, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
-import { RoborockCleaningCardConfig, VacuumArea } from './types';
+import { RoborockCleaningCardConfig, RoborockCleaningMode, VacuumArea } from './types';
 import type { HomeAssistant } from 'custom-card-helpers';
 import { VacuumRobot } from './vacuum_robot';
 import localize from './localize';
@@ -79,7 +79,9 @@ export class RoborockCleaningCard extends LitElement {
         .robot=${this.robot}
         .areas=${areas}
         iconColor=${this.iconColor}
-        .inline=${true}>
+        .inline=${true}
+        .defaultMode=${this.config.default_mode ?? RoborockCleaningMode.VacAndMop}
+        .defaultModes=${this.config.default_modes ?? {}}>
       </custom-cleaning-popup>
     `;
   }
@@ -111,10 +113,6 @@ export class RoborockCleaningCard extends LitElement {
 
   getCardSize(): number {
     return 3;
-  }
-
-  static getConfigElement() {
-    return document.createElement('roborock-cleaning-card-editor');
   }
 
   static getStubConfig() {

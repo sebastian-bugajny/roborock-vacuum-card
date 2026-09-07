@@ -27,20 +27,15 @@ Standalone cleaning control panel that can be placed anywhere in your dashboard.
 ```yaml
 type: custom:roborock-vacuum-card
 entity: vacuum.robot
-# Optional: Custom entity names for mop settings (useful for non-English integrations)
-# mop_intensity_entity: select.robot_intensywnosc_mopa
-# mop_mode_entity: select.robot_tryb_mopa
+# All other entities (battery, errors, mop drying, mop settings) are discovered
+# automatically from the entity registry - renamed and translated ones included.
 # Optional: Show custom cleaning panel inline instead of as a popup (default: false)
 # show_custom_cleaning_inline: true
-# Optional: Override default sensor entity IDs (useful for non-English integrations)
+# Optional: override the automatic discovery, see the `sensors` section below
 # sensors:
 #   battery: sensor.robot_bateria
-#   vacuumError: sensor.robot_blad_odkurzacza
-#   dockError: sensor.robot_dock_dock_error
-#   mopDryingSwitch: switch.robot_dock_mop_drying
-#   mopDrying: binary_sensor.robot_dock_mop_drying
-#   mopDryingRemainingTime: sensor.robot_dock_mop_drying_remaining_time
-#   cleaning: binary_sensor.robot_cleaning
+# mop_intensity_entity: select.robot_intensywnosc_mopa
+# mop_mode_entity: select.robot_tryb_mopa
 stats:
   default:
     - entity: sensor.robot_pozostal_czas_filtrowania
@@ -119,37 +114,42 @@ areas:
 
 #### `sensors`
 - **Type:** `object`
-- **Optional**
-- **Description:** Override default sensor entity IDs. Useful for non-English integrations where sensor names differ from the English defaults.
+- **Optional - and normally not needed**
 
-**Available sensor overrides:**
-- `battery` - Battery level sensor (default: `sensor.{robot_name}_battery`)
-- `vacuumError` - Vacuum error sensor (default: `sensor.{robot_name}_vacuum_error`)
-  - Expected states: `none` = no error, other values = error description
-- `dockError` - Dock error sensor (default: `sensor.{robot_name}_dock_error`)
-  - Expected states: `ok` = no error, other values = error description
-- `mopDryingSwitch` - Mop drying switch (default: `switch.{robot_name}_dock_mop_drying`), used first if it exists
-- `mopDrying` - Mop drying status sensor (default: `binary_sensor.{robot_name}_dock_mop_drying`), deprecated by the Roborock integration and removed in HA 2027.3.0; only used when no switch is found
+The card finds its entities in the Home Assistant entity registry, matching them by the
+Roborock integration's own `translation_key` (and by device class for the battery sensor,
+which has no translation key upstream). Because that key never changes, discovery keeps
+working when:
 
-  The mop drying tile normally needs no configuration: the card looks the switch up in the entity
-  registry by its Roborock translation key, so it is found even when Home Assistant gave it an
-  entity ID that does not match the vacuum (which happens for the dock switches, because they were
-  added later than the rest of the device). Set `mopDryingSwitch` only to override that lookup.
-- `mopDryingRemainingTime` - Remaining mop drying time (default: `sensor.{robot_name}_dock_mop_drying_remaining_time`)
-- `cleaning` - Cleaning status sensor (default: `binary_sensor.{robot_name}_cleaning`)
+- you renamed entities, including into another language (`sensor.robot_bateria`),
+- Home Assistant gave an entity a prefix that does not match the vacuum
+  (`switch.salon_robot_dock_mop_drying` - this happens to entities the integration added
+  later than the device, such as the dock switches),
+- the dock's own name doubles up in the ID (`sensor.robot_dock_dock_error`).
 
-**Example for Polish integration:**
-```yaml
-type: custom:roborock-vacuum-card
-entity: vacuum.saros_10r
-sensors:
-  battery: sensor.saros_10r_bateria
-  vacuumError: sensor.saros_10r_blad_odkurzacza
-  dockError: sensor.saros_10r_dock_dock_error
-areas:
-  - area_id: salon
-    roborock_area_id: 1
-```
+Only the vacuum entity itself has to be configured. Entities are matched against the
+vacuum's device and its dock, so a second robot is never picked up by mistake.
+
+Use `sensors` only to override that lookup. Guessed entity IDs are still used as a last
+resort when the registry has no match:
+
+| Key | Entity | Fallback ID |
+| --- | --- | --- |
+| `battery` | battery sensor | `sensor.{robot}_battery` |
+| `cleaning` | cleaning binary sensor | `binary_sensor.{robot}_cleaning` |
+| `status` | detailed status sensor | `sensor.{robot}_status` |
+| `vacuumError` | vacuum error sensor (`none` = no error) | `sensor.{robot}_vacuum_error` |
+| `dockError` | dock error sensor (`ok` = no error) | `sensor.{robot}_dock_error` |
+| `mopDryingSwitch` | mop drying switch, preferred | `switch.{robot}_dock_mop_drying` |
+| `mopDrying` | deprecated mop drying binary sensor | `binary_sensor.{robot}_dock_mop_drying` |
+| `mopDryingRemainingTime` | remaining drying time | `sensor.{robot}_dock_mop_drying_remaining_time` |
+
+`mopDrying` is only read when no switch is found: the Roborock integration deprecated that
+binary sensor and it stops working in Home Assistant 2027.3.0. The switch reports the same
+state, so once the card picks it up you can safely disable the binary sensor.
+
+`mop_intensity_entity` and `mop_mode_entity` are discovered the same way and are equally
+optional.
 
 #### `areas`
 - **Type:** `array`
@@ -218,7 +218,20 @@ areas:
   - `roborock_area_id` - Roborock's internal area ID
 - `mop_intensity_entity` - Optional - Custom entity name for mop intensity control
 - `mop_mode_entity` - Optional - Custom entity name for mop mode control
-- `default_mode` - Optional - Default cleaning mode on open
-- `default_modes` - Optional - Default settings per cleaning mode
+- `default_mode` - Optional - Cleaning mode preselected on open (`vac&mop`, `mop` or `vac`; default `vac&mop`)
+- `default_modes` - Optional - Preselected suction / mop / route per cleaning mode
+
+Values in `default_modes` are only used when the vacuum actually offers them; otherwise the
+card falls back to the same order the Roborock app uses.
+
+```yaml
+default_mode: mop
+default_modes:
+  mop:
+    mop: high
+    route: deep
+  vac:
+    suction: max_plus
+```
 
 This card displays the cleaning control panel as a standalone card that can be positioned independently of the main vacuum status card.

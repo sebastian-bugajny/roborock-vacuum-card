@@ -1,4 +1,4 @@
-import { MyHomeAssistant } from './types';
+import { MyHomeAssistant, EntityRegistryEntry } from './types';
 
 const ROBOROCK_DOMAIN = 'roborock';
 
@@ -9,8 +9,9 @@ const ROBOROCK_DOMAIN = 'roborock';
  * Home Assistant builds an entity ID from the device name once, when the entity
  * is first created, so entities added later (for example the dock switches that
  * replaced the deprecated mop drying binary sensor) can end up with a different
- * prefix than the vacuum they belong to. The registry exposes the stable
- * `translation_key` of every entity, which does not change on rename.
+ * prefix than the vacuum they belong to. Users also rename entities, often into
+ * their own language. The registry exposes the stable `translation_key` of every
+ * entity, which survives both.
  */
 export class RoborockEntityResolver {
   private hass: MyHomeAssistant | undefined;
@@ -33,9 +34,36 @@ export class RoborockEntityResolver {
    * vacuum, or undefined when the registry is unavailable or has no match.
    */
   find(domain: string, translationKey: string, onDock: boolean): string | undefined {
-    const key = `${domain}.${translationKey}.${onDock}`;
-    if (this.cache.has(key)) {
-      return this.cache.get(key);
+    return this.lookup(
+      `tk.${domain}.${translationKey}.${onDock}`,
+      domain,
+      onDock,
+      entity => entity.translation_key === translationKey,
+    );
+  }
+
+  /**
+   * Same as `find`, but matches on the state's device class. Needed for the few
+   * Roborock entities that carry no translation key and take their name from the
+   * device class instead - the battery sensor is the only one the card uses.
+   */
+  findByDeviceClass(domain: string, deviceClass: string, onDock: boolean): string | undefined {
+    return this.lookup(
+      `dc.${domain}.${deviceClass}.${onDock}`,
+      domain,
+      onDock,
+      entity => this.hass?.states[entity.entity_id]?.attributes?.device_class === deviceClass,
+    );
+  }
+
+  private lookup(
+    cacheKey: string,
+    domain: string,
+    onDock: boolean,
+    matches: (entity: EntityRegistryEntry) => boolean,
+  ): string | undefined {
+    if (this.cache.has(cacheKey)) {
+      return this.cache.get(cacheKey);
     }
 
     const entities = this.hass?.entities;
@@ -46,16 +74,17 @@ export class RoborockEntityResolver {
     }
 
     const deviceId = onDock ? this.findDockDeviceId() : entities[this.vacuumEntityId]?.device_id;
+    const prefix = `${domain}.`;
     const result = deviceId === undefined
       ? undefined
       : Object.values(entities).find(entity =>
         entity.device_id === deviceId
-        && entity.translation_key === translationKey
         && entity.platform === ROBOROCK_DOMAIN
-        && entity.entity_id.startsWith(`${domain}.`)
+        && entity.entity_id.startsWith(prefix)
+        && matches(entity)
       )?.entity_id;
 
-    this.cache.set(key, result);
+    this.cache.set(cacheKey, result);
     return result;
   }
 
@@ -81,4 +110,44 @@ export class RoborockEntityResolver {
       )
     )?.id;
   }
+}
+
+/** How each configurable entity of the card is found in the registry. */
+export interface EntitySpec {
+  domain: string;
+  translationKey?: string;
+  deviceClass?: string;
+  onDock: boolean;
+}
+
+/**
+ * Registry lookup specs for the entities the card reads, taken from the
+ * official Roborock integration. `battery` has no translation key upstream, so
+ * it is matched by device class instead.
+ */
+export const ENTITY_SPECS = {
+  cleaning: { domain: 'binary_sensor', translationKey: 'in_cleaning', onDock: false },
+  status: { domain: 'sensor', translationKey: 'status', onDock: false },
+  battery: { domain: 'sensor', deviceClass: 'battery', onDock: false },
+  vacuumError: { domain: 'sensor', translationKey: 'vacuum_error', onDock: false },
+  dockError: { domain: 'sensor', translationKey: 'dock_error', onDock: true },
+  mopDryingSwitch: { domain: 'switch', translationKey: 'mop_drying', onDock: true },
+  mopDrying: { domain: 'binary_sensor', translationKey: 'mop_drying_status', onDock: true },
+  mopDryingRemainingTime: { domain: 'sensor', translationKey: 'mop_drying_remaining_time', onDock: true },
+  mopIntensity: { domain: 'select', translationKey: 'mop_intensity', onDock: false },
+  mopMode: { domain: 'select', translationKey: 'mop_mode', onDock: false },
+} as const satisfies Record<string, EntitySpec>;
+
+export type ResolvableEntity = keyof typeof ENTITY_SPECS;
+
+/** Resolves one of the known entities, or undefined when it cannot be found. */
+export function resolveEntity(
+  resolver: RoborockEntityResolver,
+  entity: ResolvableEntity,
+): string | undefined {
+  const spec: EntitySpec = ENTITY_SPECS[entity];
+
+  return spec.deviceClass
+    ? resolver.findByDeviceClass(spec.domain, spec.deviceClass, spec.onDock)
+    : resolver.find(spec.domain, spec.translationKey!, spec.onDock);
 }

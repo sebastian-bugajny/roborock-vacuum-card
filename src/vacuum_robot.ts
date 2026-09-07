@@ -6,6 +6,7 @@ import {
   MyHomeAssistant,
   HassEntity,
 } from './types'
+import { RoborockEntityResolver, resolveEntity } from './entity-resolver'
 
 const OFF_SUCTION_MODES = [RoborockSuctionMode.Off, RoborockSuctionMode.OffRaiseMainBrush];
 const INTEGRATION_MOP_MODES = ['off', 'slight', 'low', 'medium', 'moderate', 'high', 'extreme'] as const;
@@ -27,9 +28,27 @@ export class VacuumRobot {
   private entity_id!: string;
   private mop_intensity_entity?: string;
   private mop_mode_entity?: string;
+  private resolver: RoborockEntityResolver = new RoborockEntityResolver();
 
   get name(): string {
     return this.entity_id.replace('vacuum.', '');
+  }
+
+  /**
+   * Mop intensity select: explicit config wins, then the entity registry, then
+   * the guessed ID for setups where the registry is not available yet.
+   */
+  private get mopIntensityEntityId(): string {
+    return this.mop_intensity_entity
+      ?? resolveEntity(this.resolver, 'mopIntensity')
+      ?? `select.${this.name}_mop_intensity`;
+  }
+
+  /** Despite the name, the integration's `mop_mode` select holds the route. */
+  private get mopModeEntityId(): string {
+    return this.mop_mode_entity
+      ?? resolveEntity(this.resolver, 'mopMode')
+      ?? `select.${this.name}_mop_mode`;
   }
 
   static isSupportedSuctionMode(mode: RoborockSuctionMode, cleaningMode: RoborockCleaningMode): boolean {
@@ -69,10 +88,12 @@ export class VacuumRobot {
 
   public setHass(hass: MyHomeAssistant) {
     this.hass = hass;
+    this.resolver.setHass(hass);
   }
 
   public setEntity(entity_id: string) {
     this.entity_id = entity_id;
+    this.resolver.setVacuumEntity(entity_id);
   }
 
   public setMopIntensityEntity(entity?: string) {
@@ -91,7 +112,7 @@ export class VacuumRobot {
   }
 
   private getAvailableMopModeOptions(): string[] {
-    const entityId = this.mop_intensity_entity ?? `select.${this.name}_mop_intensity`;
+    const entityId = this.mopIntensityEntityId;
     const entity = this.hass?.states?.[entityId];
     const options = entity?.attributes?.options;
     const normalized = this.normalizeOptions(options, [...INTEGRATION_MOP_MODES]);
@@ -103,7 +124,7 @@ export class VacuumRobot {
   }
 
   public getAvailableRouteModes(): RoborockRouteMode[] {
-    const entityId = this.mop_mode_entity ?? `select.${this.name}_mop_mode`;
+    const entityId = this.mopModeEntityId;
     const entity = this.hass?.states?.[entityId];
     const options = entity?.attributes?.options;
     const normalized = this.normalizeOptions(options, Object.values(RoborockRouteMode));
@@ -202,7 +223,7 @@ export class VacuumRobot {
     if (!this.hass || !this.entity_id) {
       return RoborockMopMode.High; // Default value
     }
-    const entityId = this.mop_intensity_entity ?? `select.${this.name}_mop_intensity`;
+    const entityId = this.mopIntensityEntityId;
     const entity = this.hass.states[entityId];
     if (!entity) {
       return RoborockMopMode.High;
@@ -258,11 +279,11 @@ export class VacuumRobot {
     }
     
     // Check mop_intensity_entity
-    const intensityEntityId = this.mop_intensity_entity ?? `select.${this.name}_mop_intensity`;
+    const intensityEntityId = this.mopIntensityEntityId;
     const intensityEntity = this.hass.states[intensityEntityId];
     
     // Check route mode (mop_mode_entity in Polish integration)
-    const routeEntityId = this.mop_mode_entity ?? `select.${this.name}_mop_mode`;
+    const routeEntityId = this.mopModeEntityId;
     const routeEntity = this.hass.states[routeEntityId];
     
     const intensity = intensityEntity?.state.toLowerCase() || 'off';
@@ -281,7 +302,7 @@ export class VacuumRobot {
       return RoborockRouteMode.Standard; // Default value
     }
     // In Polish integration, mop_mode_entity actually contains route mode (deep, standard, etc.)
-    const entityId = this.mop_mode_entity ?? `select.${this.name}_mop_mode`;
+    const entityId = this.mopModeEntityId;
     const entity = this.hass.states[entityId];
     if (!entity) {
       return RoborockRouteMode.Standard;
@@ -373,7 +394,7 @@ export class VacuumRobot {
     }
 
     const availableModes = this.getAvailableMopModeOptions();
-    const entityId = this.mop_intensity_entity ?? `select.${this.name}_mop_intensity`;
+    const entityId = this.mopIntensityEntityId;
 
     if (availableModes.includes('off')) {
       try {
@@ -404,7 +425,7 @@ export class VacuumRobot {
       return Promise.resolve();
     }
 
-    const entityId = this.mop_intensity_entity ?? `select.${this.name}_mop_intensity`;
+    const entityId = this.mopIntensityEntityId;
     return this.hass.callService('select', 'select_option', {
       entity_id: entityId,
       option: targetValue,
@@ -415,7 +436,7 @@ export class VacuumRobot {
     if (!this.hass || !this.entity_id) {
       return Promise.reject('Robot not initialized');
     }
-    const entityId = this.mop_mode_entity ?? `select.${this.name}_mop_mode`;
+    const entityId = this.mopModeEntityId;
     return this.hass.callService('select', 'select_option', {
       entity_id: entityId,
       option: value,

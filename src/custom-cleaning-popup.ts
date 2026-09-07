@@ -15,6 +15,7 @@ import {
   RoborockMopMode,
   RoborockRouteMode,
   RoborockArea,
+  RoborockCleaningParameters,
 } from './types'
 import { MultiselectButtonGroup } from './multiselect-button-group'
 import { SegmentButtonGroup } from './segment-button-group'
@@ -36,6 +37,10 @@ export class CustomCleaningPopup extends LitElement {
   public primaryColor: string = '';
   @property({ type: Boolean })
   public inline: boolean = false;
+  @property()
+  public defaultMode: RoborockCleaningMode = RoborockCleaningMode.VacAndMop;
+  @property()
+  public defaultModes: Partial<Record<RoborockCleaningMode, RoborockCleaningParameters>> = {};
 
   @state()
   private popupRequestInProgress: boolean = false;
@@ -75,39 +80,24 @@ export class CustomCleaningPopup extends LitElement {
       value: RoborockCleaningMode.Vac
     }];
 
-    // Always start with VacAndMop mode and set appropriate defaults
-    this.activeCleaningMode = RoborockCleaningMode.VacAndMop;
-    this.activeSuctionMode = this.pickSupportedSuctionMode([
-      RoborockSuctionMode.Turbo,
-      RoborockSuctionMode.Max,
-      RoborockSuctionMode.Balanced,
-      RoborockSuctionMode.Quiet,
-      RoborockSuctionMode.MaxPlus,
-    ]);
-    this.activeMopMode = this.pickSupportedMopMode([
-      RoborockMopMode.High,
-      RoborockMopMode.Medium,
-      RoborockMopMode.Low,
-    ]);
-    this.activeRouteMode = this.pickSupportedRouteMode([
-      RoborockRouteMode.Standard,
-      RoborockRouteMode.Fast,
-      RoborockRouteMode.Deep,
-      RoborockRouteMode.DeepPlus,
-    ]);
-    this.modesInitialized = true;
   }
 
   protected willUpdate(changedProps: Map<string, any>) {
     super.willUpdate(changedProps);
 
-    // This will be called when cleaning mode changes via onCleaningModeChange
+    // Property bindings are committed after connectedCallback, so the initial
+    // mode can only be applied once `robot` and the defaults are actually set.
+    if (!this.modesInitialized && this.robot) {
+      this.activeCleaningMode = this.defaultMode;
+      this.applyModeDefaults();
+      this.modesInitialized = true;
+    }
   }
 
   private onCleaningModeChange(e: StringEvent) {
     const cleaningMode = e.detail as RoborockCleaningMode;;
     this.activeCleaningMode = cleaningMode;
-    this.fixModesIfNeeded();
+    this.applyModeDefaults();
   }
 
   private onSuctionModeChange(e: StringEvent) {
@@ -408,12 +398,19 @@ export class CustomCleaningPopup extends LitElement {
     `;
   }
 
-  private fixModesIfNeeded() {
-    // Set suction mode based on cleaning mode
+  /**
+   * Applies the defaults for the active cleaning mode. A `default_modes` entry
+   * from the card config is preferred, then the order the Roborock app uses.
+   */
+  private applyModeDefaults() {
+    const configured: RoborockCleaningParameters = this.defaultModes?.[this.activeCleaningMode] ?? {};
+
+    // Mop-only always forces suction off, so config must not override it.
     if (this.activeCleaningMode == RoborockCleaningMode.Mop) {
       this.activeSuctionMode = this.robot.getPreferredMopOnlySuctionMode();
     } else if (this.activeCleaningMode == RoborockCleaningMode.Vac) {
       this.activeSuctionMode = this.pickSupportedSuctionMode([
+        configured.suction,
         RoborockSuctionMode.MaxPlus,
         RoborockSuctionMode.Max,
         RoborockSuctionMode.Turbo,
@@ -422,6 +419,7 @@ export class CustomCleaningPopup extends LitElement {
       ]);
     } else {
       this.activeSuctionMode = this.pickSupportedSuctionMode([
+        configured.suction,
         RoborockSuctionMode.Turbo,
         RoborockSuctionMode.Max,
         RoborockSuctionMode.Balanced,
@@ -430,18 +428,18 @@ export class CustomCleaningPopup extends LitElement {
       ]);
     }
 
-    // Set mop mode based on cleaning mode
     if (this.activeCleaningMode != RoborockCleaningMode.Vac) {
       this.activeMopMode = this.pickSupportedMopMode([
+        configured.mop,
         RoborockMopMode.High,
         RoborockMopMode.Medium,
         RoborockMopMode.Low,
       ]);
     }
 
-    // Set route mode based on cleaning mode
     if (this.activeCleaningMode == RoborockCleaningMode.Mop) {
       this.activeRouteMode = this.pickSupportedRouteMode([
+        configured.route,
         RoborockRouteMode.Deep,
         RoborockRouteMode.DeepPlus,
         RoborockRouteMode.Standard,
@@ -449,6 +447,7 @@ export class CustomCleaningPopup extends LitElement {
       ]);
     } else {
       this.activeRouteMode = this.pickSupportedRouteMode([
+        configured.route,
         RoborockRouteMode.Standard,
         RoborockRouteMode.Fast,
         RoborockRouteMode.Deep,
@@ -457,25 +456,25 @@ export class CustomCleaningPopup extends LitElement {
     }
   }
 
-  private pickSupportedSuctionMode(preferredModes: RoborockSuctionMode[]): RoborockSuctionMode {
+  private pickSupportedSuctionMode(preferredModes: (RoborockSuctionMode | undefined)[]): RoborockSuctionMode {
     const availableModes = this.robot?.getAvailableSuctionModes?.() ?? [];
-    return preferredModes.find(mode => availableModes.includes(mode))
+    return preferredModes.find(mode => mode !== undefined && availableModes.includes(mode))
       ?? availableModes.find(mode => ![RoborockSuctionMode.Off, RoborockSuctionMode.OffRaiseMainBrush].includes(mode))
       ?? availableModes[0]
       ?? RoborockSuctionMode.Turbo;
   }
 
-  private pickSupportedMopMode(preferredModes: RoborockMopMode[]): RoborockMopMode {
+  private pickSupportedMopMode(preferredModes: (RoborockMopMode | undefined)[]): RoborockMopMode {
     const availableModes = this.robot?.getVisibleMopModes?.() ?? [];
-    return preferredModes.find(mode => availableModes.includes(mode))
+    return preferredModes.find(mode => mode !== undefined && availableModes.includes(mode))
       ?? availableModes.find(mode => mode !== RoborockMopMode.Off)
       ?? availableModes[0]
       ?? RoborockMopMode.High;
   }
 
-  private pickSupportedRouteMode(preferredModes: RoborockRouteMode[]): RoborockRouteMode {
+  private pickSupportedRouteMode(preferredModes: (RoborockRouteMode | undefined)[]): RoborockRouteMode {
     const availableModes = this.robot?.getAvailableRouteModes?.() ?? [];
-    return preferredModes.find(mode => availableModes.includes(mode))
+    return preferredModes.find(mode => mode !== undefined && availableModes.includes(mode))
       ?? availableModes[0]
       ?? RoborockRouteMode.Standard;
   }
