@@ -1,255 +1,138 @@
 # Roborock Vacuum Card
 
-Home Assistant vacuum card that uses core Roborock integration and supports multi-selecting areas for cleaning.
+Home Assistant card for Roborock vacuums built on the **official Roborock integration** - no
+custom component required. Shows status, cleaning modes, consumables and a custom cleaning
+panel with multi-room selection.
 
 ![Roborock Vacuum Card](/images/roborock-vacuum-card.png)
 
 ![Roborock Vacuum Card custom cleaning](/images/roborock-vacuum-card-popup.png)
 
-## Caveat
+## Requirements
 
-This card is not highly configurable and was created for personal use. It expects (and was tested with) the Roborock Saros 10R vacuum robot and dock.
+- Home Assistant **2026.3.0** or newer
+- The built-in [Roborock integration](https://www.home-assistant.io/integrations/roborock)
+  set up for your robot
 
-## Cards
+Developed and tested against a **Roborock Saros 10R** with dock. Entities and rooms are
+discovered from Home Assistant rather than hardcoded, so other Roborock models on the same
+integration should work - see [Known limitations](#known-limitations) for where that is not
+guaranteed yet.
 
-This integration provides two custom cards:
+## Installation
 
-### 1. Roborock Vacuum Card (`roborock-vacuum-card`)
-Main card showing vacuum status, stats, and optionally inline cleaning controls.
+### HACS
 
-### 2. Roborock Cleaning Card (`roborock-cleaning-card`)
-Standalone cleaning control panel that can be placed anywhere in your dashboard. Perfect for creating a separate cleaning control panel independent of the main vacuum card.
+1. HACS → three-dot menu → **Custom repositories**
+2. Add `https://github.com/sebastian-bugajny/roborock-vacuum-card` with type **Dashboard**
+   (called **Lovelace** in HACS 1.x)
+3. Install **Roborock Vacuum Card**, then reload your browser with a hard refresh
+   (`Ctrl`/`Cmd` + `Shift` + `R`)
 
-## Card configuration
+Pre-release versions (`1.0.0-beta.x`) are only offered when you enable **Show beta versions**
+in the card's HACS menu.
 
-### Roborock Vacuum Card
+### Manual
 
-```yaml
-type: custom:roborock-vacuum-card
-entity: vacuum.robot
-# All other entities (battery, errors, mop drying, mop settings, consumables) are
-# discovered automatically from the entity registry - renamed and translated ones
-# included. A minimal card is just the two lines above.
-# Optional: Show the vacuum image (default: false)
-# show_roborock_icon: true
-# Optional: Show custom cleaning panel inline instead of as a popup (default: false)
-# show_custom_cleaning_inline: true
-# Optional: override the automatic discovery, see the `sensors` section below
-# sensors:
-#   battery: sensor.robot_bateria
-# mop_intensity_entity: select.robot_intensywnosc_mopa
-# mop_mode_entity: select.robot_tryb_mopa
-stats:
-  default:
-    - entity: sensor.robot_pozostal_czas_filtrowania
-      scale: 0
-      title: Filtr
-      unit: h
-    - entity: sensor.robot_pozostal_czas_szczotki_bocznej
-      scale: 0
-      title: Szczotka boczna
-      unit: h
-    - entity: sensor.robot_pozostal_czas_szczotki_glownej
-      scale: 0
-      unit: h
-      title: Szczotka główna
-    - entity: sensor.robot_pozostal_czas_sensora
-      scale: 0
-      unit: h
-      title: Sensory
-  cleaning:
-    - entity: sensor.robot_cleaning_progress
-      title: Postęp czyszczenia
-      unit: "%"
-    - entity: sensor.robot_current_room
-      title: Czyszczone pomieszczenie
-    - entity: sensor.robot_czas_czyszczenia
-      format: minutes_to_minutes_seconds
-      title: Czas sprzątania
-      unit: min
-areas:
-  - area_id: jadalnia
-    roborock_area_id: 3
-  - area_id: kuchnia
-    roborock_area_id: 4
-  - area_id: przedpokoj
-    roborock_area_id: 2
-  - area_id: salon
-    roborock_area_id: 1
+Copy `dist/roborock-vacuum-card.js` to `config/www/` and add it under
+**Settings → Dashboards → three-dot menu → Resources** as a JavaScript module.
 
-```
+## Quick start
 
-### Configuration Options
+Add **Roborock Vacuum Card** from the card picker, or paste this:
 
-#### `entity`
-- **Type:** `string`
-- **Required:** `true`
-- **Description:** The vacuum entity ID (e.g., `vacuum.saros_10r`)
-
-#### `mop_intensity_entity`
-- **Type:** `string`
-- **Optional**
-- **Description:** Custom entity ID for mop intensity control. Useful for non-English integrations where entity names differ from defaults.
-- **Default:** `select.{robot_name}_mop_intensity`
-- **Example:** `select.saros_10r_intensywnosc_mopa`
-
-#### `mop_mode_entity`
-- **Type:** `string`
-- **Optional**
-- **Description:** Custom entity ID for mop mode control. Useful for non-English integrations where entity names differ from defaults.
-- **Default:** `select.{robot_name}_mop_mode`
-- **Example:** `select.saros_10r_tryb_mopa`
-
-#### `show_custom_cleaning_inline`
-- **Type:** `boolean`
-- **Default:** `false`
-- **Description:** When set to `true`, the custom cleaning panel is always visible below the main card instead of appearing as a popup. This provides quick access to room selection and cleaning modes without needing to click to open a popup.
-
-**Example:**
 ```yaml
 type: custom:roborock-vacuum-card
 entity: vacuum.saros_10r
-show_custom_cleaning_inline: true
-areas:
-  - area_id: salon
-    roborock_area_id: 1
 ```
 
-#### `sensors`
-- **Type:** `object`
-- **Optional - and normally not needed**
+That is the whole configuration. Everything else - battery, status, errors, mop drying, mop
+settings, consumable counters and the list of cleanable rooms - is discovered automatically.
 
-The card finds its entities in the Home Assistant entity registry, matching them by the
-Roborock integration's own `translation_key` (and by device class for the battery sensor,
-which has no translation key upstream). Because that key never changes, discovery keeps
-working when:
+## The two cards
 
-- you renamed entities, including into another language (`sensor.robot_bateria`),
-- Home Assistant gave an entity a prefix that does not match the vacuum
-  (`switch.salon_robot_dock_mop_drying` - this happens to entities the integration added
-  later than the device, such as the dock switches),
-- the dock's own name doubles up in the ID (`sensor.robot_dock_dock_error`).
+### `roborock-vacuum-card`
 
-Only the vacuum entity itself has to be configured. Entities are matched against the
-vacuum's device and its dock, so a second robot is never picked up by mistake.
+The main card: name, cleaning modes, mop drying countdown, battery, robot state, consumable
+counters, and Start / Locate (or Pause / Stop / Return to dock while cleaning). Clicking the
+card body opens the custom cleaning panel; `show_custom_cleaning_inline: true` keeps that
+panel permanently visible instead.
 
-Use `sensors` only to override that lookup. Guessed entity IDs are still used as a last
-resort when the registry has no match:
+### `roborock-cleaning-card`
 
-| Key | Entity | Fallback ID |
-| --- | --- | --- |
-| `battery` | battery sensor | `sensor.{robot}_battery` |
-| `cleaning` | cleaning binary sensor | `binary_sensor.{robot}_cleaning` |
-| `status` | detailed status sensor | `sensor.{robot}_status` |
-| `vacuumError` | vacuum error sensor (`none` = no error) | `sensor.{robot}_vacuum_error` |
-| `dockError` | dock error sensor (`ok` = no error) | `sensor.{robot}_dock_error` |
-| `mopDryingSwitch` | mop drying switch, preferred | `switch.{robot}_dock_mop_drying` |
-| `mopDrying` | deprecated mop drying binary sensor | `binary_sensor.{robot}_dock_mop_drying` |
-| `mopDryingRemainingTime` | remaining drying time | `sensor.{robot}_dock_mop_drying_remaining_time` |
-
-`mopDrying` is only read when no switch is found: the Roborock integration deprecated that
-binary sensor and it stops working in Home Assistant 2027.3.0. The switch reports the same
-state, so once the card picks it up you can safely disable the binary sensor.
-
-`mop_intensity_entity` and `mop_mode_entity` are discovered the same way and are equally
-optional.
-
-#### `areas`
-- **Type:** `array`
-- **Optional - and normally not needed**
-
-Rooms in the custom cleaning panel are discovered from the robot through the
-`roborock.get_maps` service, which reports every room of every map together with its
-internal segment ID. That means:
-
-- no room has to be listed in the config, and no segment ID has to be looked up,
-- a room added in the Roborock app shows up on its own, because the card re-reads the
-  list whenever the vacuum reports different rooms or a different map,
-- only rooms of the currently selected map are offered,
-- a room gets an icon if a Home Assistant area with the same name has one.
-
-The service only reads data the Roborock integration has already polled, so discovery
-costs no request to the robot.
-
-Set `areas` to take over from discovery - to offer a subset of rooms, force an order, or
-rename them. Each entry needs:
-  - `area_id` - Home Assistant area, used for the label and icon
-  - `roborock_area_id` - the room's segment ID
-
-```yaml
-areas:
-  - area_id: living_room
-    roborock_area_id: 1
-  - area_id: kitchen
-    roborock_area_id: 2
-```
-
-To read the segment IDs of your own robot, call `roborock.get_maps` in
-**Developer tools → Actions** with your vacuum as the target.
-
-### Stats Configuration Options
-
-`stats` is optional. When it is left out, the card shows the four consumable counters
-(filter, side brush, main brush, sensors), discovered from the entity registry - so they
-work on a renamed or non-English setup without naming a single entity, and a counter the
-model does not report is simply left out.
-
-Define `stats` to replace those defaults with your own tiles. Each stat can have the
-following properties:
-
-- `entity` - Home Assistant entity ID
-- `attribute` - Entity attribute to display (optional)
-- `title` - Display title for the stat
-- `unit` - Unit to display after the value
-- `scale` - Number of decimal places (optional)
-- `divide_by` - Divide the value by this number (optional)
-- `format` - Special formatting option:
-  - `time_minutes_seconds` - Format seconds as MM:SS (e.g., "21:35" for 1295 seconds)
-  - `minutes_to_minutes_seconds` - Format minutes as MM:SS (e.g., "32:45" for 32.75 minutes)
-
-**Example:** To show cleaning time in MM:SS format when sensor reports minutes:
-```yaml
-- entity: sensor.robot_cleaning_time
-  format: minutes_to_minutes_seconds
-  title: Cleaning time
-  unit: min
-```
-
-### Roborock Cleaning Card
-
-Standalone cleaning control card that can be placed anywhere in your dashboard.
+Only the custom cleaning panel, as a standalone card, so it can live anywhere on the
+dashboard independently of the status card.
 
 ```yaml
 type: custom:roborock-cleaning-card
 entity: vacuum.saros_10r
-# Optional: Custom entity names for mop settings
-mop_intensity_entity: select.saros_10r_intensywnosc_mopa
-mop_mode_entity: select.saros_10r_tryb_mopa
-areas:
-  - area_id: salon
-    roborock_area_id: 1
-  - area_id: kuchnia
-    roborock_area_id: 4
-  - area_id: sypialnia
-    roborock_area_id: 2
-  - area_id: lazienka
-    roborock_area_id: 3
 ```
 
-#### Configuration Options
+## Automatic discovery
 
-- `entity` - **Required** - Vacuum entity ID
-- `areas` - Optional - List of rooms to clean; left out, the rooms are discovered from the
-  robot (see the `areas` section of the vacuum card above)
-  - `area_id` - Area identifier for translation (e.g., `salon`, `kuchnia`)
-  - `roborock_area_id` - Roborock's internal area ID
-- `mop_intensity_entity` - Optional - Custom entity name for mop intensity control
-- `mop_mode_entity` - Optional - Custom entity name for mop mode control
-- `default_mode` - Optional - Cleaning mode preselected on open (`vac&mop`, `mop` or `vac`; default `vac&mop`)
-- `default_modes` - Optional - Preselected suction / mop / route per cleaning mode
+The card does not build entity IDs from the vacuum's name. It looks entities up in the Home
+Assistant entity registry, matching the Roborock integration's own `translation_key` (and the
+device class for the battery sensor, which has no translation key upstream). That key never
+changes, so discovery keeps working when:
 
-Values in `default_modes` are only used when the vacuum actually offers them; otherwise the
-card falls back to the same order the Roborock app uses.
+- you renamed entities, including into another language (`sensor.robot_bateria`),
+- Home Assistant gave an entity a prefix that does not match the vacuum
+  (`switch.living_room_robot_dock_mop_drying` - this happens to entities the integration
+  added later than the device, such as the dock switches),
+- the dock's name doubles up in the ID (`sensor.robot_dock_dock_error`).
+
+Entities are matched against the vacuum's own device and its dock, so with two robots neither
+card ever picks up the other one's entities.
+
+Rooms are read from the `roborock.get_maps` action, which reports every room of every map
+together with its internal segment ID. The action only reads data the integration has already
+polled, so it costs no request to the robot.
+
+Everything below is therefore optional - use it to override what discovery found.
+
+## `roborock-vacuum-card` options
+
+| Option | Type | Default | Description |
+| --- | --- | --- | --- |
+| `entity` | string | **required** | The vacuum entity, e.g. `vacuum.saros_10r` |
+| `show_roborock_icon` | boolean | `false` | Show the vacuum image in the card body |
+| `show_custom_cleaning_inline` | boolean | `false` | Keep the cleaning panel always visible instead of opening it as a popup |
+| `stats` | object | consumables | Tiles below the robot state, per vacuum state - see [Stats](#stats) |
+| `areas` | list | discovered | Rooms offered for cleaning - see [Rooms](#rooms) |
+| `sensors` | object | discovered | Override individual entity lookups - see [Overriding discovery](#overriding-discovery) |
+| `mop_intensity_entity` | string | discovered | The mop intensity `select` entity |
+| `mop_mode_entity` | string | discovered | The route `select` entity (the integration calls it "mop mode") |
+| `default_mode` | string | `vac&mop` | Cleaning mode preselected when the panel opens: `vac&mop`, `mop` or `vac` |
+| `default_modes` | object | app defaults | Preselected suction / mop / route per cleaning mode |
+
+## `roborock-cleaning-card` options
+
+`entity`, `areas`, `mop_intensity_entity`, `mop_mode_entity`, `default_mode` and
+`default_modes` behave exactly as above.
+
+The remaining options do not apply: this card *is* the cleaning panel, so it is always inline
+and shows no status, stats or sensor tiles - and therefore takes no `sensors`,
+`show_roborock_icon`, `show_custom_cleaning_inline` or `stats`.
+
+## The custom cleaning panel
+
+Rows from top to bottom: cleaning mode (vacuum and mop / mop only / vacuum only), suction
+level, mop intensity, route, cleaning count, then the room tiles.
+
+Which levels are offered per mode follows the Roborock app - four suction levels with mopping,
+five in vacuum-only mode, two routes with vacuum and four in mop-only mode.
+
+- **CLEAN** applies the selected settings and cleans the selected rooms. Enabled only once at
+  least one room is selected.
+- **CLEAN ALL** applies the settings and starts a whole-home clean. With the count set to
+  `×2` it instead cleans every known room twice, because Home Assistant has no whole-home
+  repeat counter.
+
+### `default_mode` and `default_modes`
+
+Values in `default_modes` are used only when the vacuum actually offers them; otherwise the
+card falls back to the order the Roborock app uses. Mop-only always forces suction off, so
+`suction` is ignored for that mode.
 
 ```yaml
 default_mode: mop
@@ -259,6 +142,138 @@ default_modes:
     route: deep
   vac:
     suction: max_plus
+  vac&mop:
+    suction: turbo
 ```
 
-This card displays the cleaning control panel as a standalone card that can be positioned independently of the main vacuum status card.
+Accepted values: `suction` - `quiet`, `balanced`, `turbo`, `max`, `max_plus`; `mop` - `low`,
+`medium`, `high`; `route` - `fast`, `standard`, `deep`, `deep_plus`.
+
+## Rooms
+
+Rooms are discovered and need no configuration:
+
+- no segment IDs to look up,
+- a room added in the Roborock app appears on its own, because the card re-reads the list
+  whenever the robot reports different rooms or a different map,
+- only rooms of the currently selected map are offered,
+- tiles are sorted by name, and a room borrows the icon of a Home Assistant area with the
+  same name.
+
+Set `areas` to take over from discovery - to offer a subset of rooms, force an order, or use
+your own labels:
+
+```yaml
+areas:
+  - area_id: living_room
+    roborock_area_id: 1
+  - area_id: kitchen
+    roborock_area_id: 2
+```
+
+- `area_id` - a Home Assistant area; its name and icon become the tile's label and icon.
+  **An entry whose area does not exist in Home Assistant is skipped.**
+- `roborock_area_id` - the room's segment ID.
+
+To read the segment IDs of your own robot, run this in **Developer tools → Actions**:
+
+```yaml
+action: roborock.get_maps
+target:
+  entity_id: vacuum.saros_10r
+```
+
+## Stats
+
+Left out, `stats` shows four consumable counters - filter, side brush, main brush, sensors -
+discovered from the registry, with counters the model does not report simply omitted.
+
+Define `stats` to replace them with your own tiles. Tiles are keyed by robot state, so the
+card can show different numbers while cleaning; `default` is used for any state without its
+own entry. Valid keys are `default` plus the vacuum states `cleaning`, `docked`, `idle`,
+`paused`, `returning` and `error`.
+
+```yaml
+stats:
+  default:
+    - entity: sensor.saros_10r_filter_time_left
+      title: Filter
+      unit: h
+      scale: 0
+  cleaning:
+    - entity: sensor.saros_10r_cleaning_progress
+      title: Progress
+      unit: "%"
+    - entity: sensor.saros_10r_current_room
+      title: Room
+    - entity: sensor.saros_10r_cleaning_time
+      title: Elapsed
+      unit: min
+      format: minutes_to_minutes_seconds
+```
+
+Each tile takes:
+
+| Key | Description |
+| --- | --- |
+| `entity` | Entity to read |
+| `attribute` | Read this attribute instead of the state; without `entity` it is read from the vacuum entity |
+| `title` | Label under the value |
+| `unit` | Unit appended to the value |
+| `scale` | Decimal places |
+| `divide_by` | Divide the value first |
+| `format` | `time_minutes_seconds` (seconds → `MM:SS`) or `minutes_to_minutes_seconds` (minutes → `MM:SS`) |
+
+Clicking a tile opens the entity's more-info dialog.
+
+## Overriding discovery
+
+`sensors` replaces individual lookups. A guessed entity ID is still used as a last resort when
+the registry has no match - `{robot}` there is whatever follows `vacuum.` in the `entity`
+option:
+
+| Key | Entity | Fallback ID |
+| --- | --- | --- |
+| `battery` | battery sensor | `sensor.{robot}_battery` |
+| `cleaning` | cleaning binary sensor | `binary_sensor.{robot}_cleaning` |
+| `status` | detailed status sensor, appended to the robot state | `sensor.{robot}_status` |
+| `vacuumError` | vacuum error sensor (`none` = no error) | `sensor.{robot}_vacuum_error` |
+| `dockError` | dock error sensor (`ok` = no error) | `sensor.{robot}_dock_error` |
+| `mopDryingSwitch` | mop drying switch, preferred | `switch.{robot}_dock_mop_drying` |
+| `mopDrying` | deprecated mop drying binary sensor | `binary_sensor.{robot}_dock_mop_drying` |
+| `mopDryingRemainingTime` | remaining drying time | `sensor.{robot}_dock_mop_drying_remaining_time` |
+
+```yaml
+sensors:
+  battery: sensor.saros_10r_bateria
+```
+
+`mopDrying` is only read when no switch is found: the Roborock integration deprecated that
+binary sensor and it stops working in Home Assistant 2027.3.0. The switch reports the same
+state, so once the card picks it up you can safely disable the binary sensor.
+
+## Known limitations
+
+- **Suction, mop and route levels use a fixed vocabulary** (`quiet`/`balanced`/`turbo`/`max`/
+  `max_plus`, `low`/`medium`/`high`, `fast`/`standard`/`deep`/`deep_plus`). Models that report
+  other level names - for example the `mild`/`standard`/`intense` set used by robots with a
+  vibrating mop pad - will show buttons that do not match. Making these fully device-driven is
+  in progress.
+- **Card text is available in English and Polish only**, picked from the browser language.
+  Robot states and error names come from the card's own translations, so states the card does
+  not know are shown as raw values such as `going_to_wash_the_mop`.
+- The mop drying countdown assumes the remaining-time sensor reports minutes or seconds.
+
+## Troubleshooting
+
+**The card says "Entity … not found".** The `entity` in the configuration does not exist.
+Check it under Developer tools → States.
+
+**No rooms appear in the cleaning panel.** Run the `roborock.get_maps` action shown above. If
+it returns no maps, the integration has no map data yet and the card cannot invent it. If it
+does return rooms, filter the browser console for `roborock-vacuum-card` - the card logs why
+the lookup failed.
+
+**An old version keeps loading.** The browser caches the card. Hard refresh, and in the
+Home Assistant companion app use Settings → Companion app → Debugging → Reset frontend cache.
+The version the card actually loaded is logged to the browser console on startup.
