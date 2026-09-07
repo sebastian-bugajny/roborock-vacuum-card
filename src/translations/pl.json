@@ -106,5 +106,11 @@
     "return_to_base": "Powróć do stacji",
     "locate": "Zlokalizuj",
     "stop": "Zatrzymaj"
+  },
+  "stats": {
+    "filter": "Filtr",
+    "side_brush": "Szczotka boczna",
+    "main_brush": "Szczotka główna",
+    "sensors": "Sensory"
   }
 }

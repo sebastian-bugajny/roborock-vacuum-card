@@ -106,5 +106,11 @@
     "return_to_base": "Return to base",
     "locate": "Locate",
     "stop": "Stop"
+  },
+  "stats": {
+    "filter": "Filter",
+    "side_brush": "Side brush",
+    "main_brush": "Main brush",
+    "sensors": "Sensors"
   }
 }

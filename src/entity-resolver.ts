@@ -136,6 +136,10 @@ export const ENTITY_SPECS = {
   mopDryingRemainingTime: { domain: 'sensor', translationKey: 'mop_drying_remaining_time', onDock: true },
   mopIntensity: { domain: 'select', translationKey: 'mop_intensity', onDock: false },
   mopMode: { domain: 'select', translationKey: 'mop_mode', onDock: false },
+  filterTimeLeft: { domain: 'sensor', translationKey: 'filter_time_left', onDock: false },
+  sideBrushTimeLeft: { domain: 'sensor', translationKey: 'side_brush_time_left', onDock: false },
+  mainBrushTimeLeft: { domain: 'sensor', translationKey: 'main_brush_time_left', onDock: false },
+  sensorTimeLeft: { domain: 'sensor', translationKey: 'sensor_time_left', onDock: false },
 } as const satisfies Record<string, EntitySpec>;
 
 export type ResolvableEntity = keyof typeof ENTITY_SPECS;

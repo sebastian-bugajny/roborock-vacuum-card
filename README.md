@@ -27,8 +27,11 @@ Standalone cleaning control panel that can be placed anywhere in your dashboard.
 ```yaml
 type: custom:roborock-vacuum-card
 entity: vacuum.robot
-# All other entities (battery, errors, mop drying, mop settings) are discovered
-# automatically from the entity registry - renamed and translated ones included.
+# All other entities (battery, errors, mop drying, mop settings, consumables) are
+# discovered automatically from the entity registry - renamed and translated ones
+# included. A minimal card is just the two lines above.
+# Optional: Show the vacuum image (default: false)
+# show_roborock_icon: true
 # Optional: Show custom cleaning panel inline instead of as a popup (default: false)
 # show_custom_cleaning_inline: true
 # Optional: override the automatic discovery, see the `sensors` section below
@@ -169,7 +172,13 @@ areas:
 
 ### Stats Configuration Options
 
-Each stat can have the following properties:
+`stats` is optional. When it is left out, the card shows the four consumable counters
+(filter, side brush, main brush, sensors), discovered from the entity registry - so they
+work on a renamed or non-English setup without naming a single entity, and a counter the
+model does not report is simply left out.
+
+Define `stats` to replace those defaults with your own tiles. Each stat can have the
+following properties:
 
 - `entity` - Home Assistant entity ID
 - `attribute` - Entity attribute to display (optional)

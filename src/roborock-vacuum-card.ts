@@ -18,6 +18,7 @@ import {
   RoborockSuctionMode,
   RoborockMopMode,
   RoborockRouteMode,
+  VacuumCardStat,
 } from './types'
 import { formatTime, formatTimeAsMinutesSeconds, formatMinutesAsMinutesSeconds } from './format'
 import { getSuctionIcon, getMoppingIcon as getMopIcon, getRouteIcon } from './resorces'
@@ -294,11 +295,40 @@ export class RoborockVacuumCard extends LitElement {
     `;
   }
 
+  /**
+   * Consumable counters shown when the config defines no `stats`. Resolved from
+   * the registry, so no entity IDs have to be spelled out, and skipped silently
+   * for models that do not report a given consumable.
+   */
+  private defaultStats(): VacuumCardStat[] {
+    const consumables: [ResolvableEntity, string][] = [
+      ['filterTimeLeft', 'stats.filter'],
+      ['sideBrushTimeLeft', 'stats.side_brush'],
+      ['mainBrushTimeLeft', 'stats.main_brush'],
+      ['sensorTimeLeft', 'stats.sensors'],
+    ];
+
+    return consumables.flatMap(([field, titleKey]) => {
+      const entityId = resolveEntity(this.resolver, field);
+      const entity = entityId ? this.hass.states[entityId] : undefined;
+      if (!entity)
+        return [];
+
+      return [{
+        entity: entityId,
+        title: localize(titleKey),
+        unit: entity.attributes.unit_of_measurement,
+        scale: 0,
+      }];
+    });
+  }
+
   private renderStats(state: string | undefined): Template {
     if (state === undefined)
       return nothing;
 
-    const statsList = this.config.stats[state] || this.config.stats.default || [];
+    const configured = this.config.stats[state] || this.config.stats.default;
+    const statsList = configured?.length ? configured : this.defaultStats();
 
     const stats = statsList.map(
       ({ entity, attribute, scale, divide_by, unit, title, format }) => {
@@ -560,6 +590,9 @@ export class RoborockVacuumCard extends LitElement {
 
     return {
       entity: vacuum ?? 'vacuum.robot',
+      show_roborock_icon: true,
+      // Left empty on purpose: the card then derives the consumable counters
+      // from the registry, so the picker needs no entity IDs.
       stats: {},
     };
   }
