@@ -28,9 +28,23 @@ export interface Area {
   icon?: string;
   name?: string;
 }
+export interface EntityRegistryEntry {
+  entity_id: string;
+  device_id?: string;
+  area_id?: string;
+  platform?: string;
+  translation_key?: string;
+}
+export interface DeviceRegistryEntry {
+  id: string;
+  identifiers: [string, string][];
+}
 export interface MyHomeAssistant extends HomeAssistant {
   areas: Record<string, Area>;
   themes: Themes
+  // Present in the HA frontend, but missing from the custom-card-helpers types.
+  entities?: Record<string, EntityRegistryEntry>;
+  devices?: Record<string, DeviceRegistryEntry>;
 }
 
 export enum RoborockCleaningMode {
@@ -123,7 +137,9 @@ export interface RoborockCleaningCardConfig {
 
 export interface RoborockSensorIds {
   cleaning: string;
+  /** Deprecated in HA 2027.3.0, kept as a fallback for older Roborock integrations. */
   mopDrying: string;
+  mopDryingSwitch: string;
   mopDryingRemainingTime: string;
   battery: string;
   vacuumError?: string;
