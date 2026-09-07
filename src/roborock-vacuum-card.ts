@@ -7,6 +7,7 @@ import styles from './styles.css';
 import buildConfig from './config'
 import localize from './localize';
 import { VacuumRobot } from './vacuum_robot'
+import { RoborockEntityResolver } from './entity-resolver'
 import {
   Template,
   RoborockArea,
@@ -46,6 +47,7 @@ export class RoborockVacuumCard extends LitElement {
 
   private iconColor: string = '#000';
   private robot!: VacuumRobot;
+  private resolver: RoborockEntityResolver = new RoborockEntityResolver();
 
   get name(): string {
     return this.config.entity.replace('vacuum.', '');
@@ -56,6 +58,7 @@ export class RoborockVacuumCard extends LitElement {
     const defaults = {
       cleaning: `binary_sensor.${name}_cleaning`,
       mopDrying: `binary_sensor.${name}_dock_mop_drying`,
+      mopDryingSwitch: `switch.${name}_dock_mop_drying`,
       mopDryingRemainingTime: `sensor.${name}_dock_mop_drying_remaining_time`,
       battery: `sensor.${name}_battery`,
       vacuumError: `sensor.${name}_vacuum_error`,
@@ -77,6 +80,7 @@ export class RoborockVacuumCard extends LitElement {
 
   setConfig(config: RoborockVacuumCardConfig) {
     this.config = buildConfig(config);
+    this.resolver.setVacuumEntity(this.config.entity);
     this.robot.setEntity(this.config.entity);
     this.robot.setMopIntensityEntity(this.config.mop_intensity_entity);
     this.robot.setMopModeEntity(this.config.mop_mode_entity);
@@ -140,6 +144,7 @@ export class RoborockVacuumCard extends LitElement {
       .getPropertyValue("--state-icon-color")
       .trim();
     this.robot.setHass(this.hass);
+    this.resolver.setHass(this.hass);
 
     const isCleaning = this.state(this.sensor.cleaning) == 'on';
     const state = this.state(this.config.entity);
@@ -426,8 +431,31 @@ export class RoborockVacuumCard extends LitElement {
     `;
   }
 
+  /**
+   * Picks the first entity that actually exists, so that an explicit config
+   * override always wins over a default or a registry lookup.
+   */
+  private firstAvailable(...entityIds: (string | undefined)[]): HassEntity | undefined {
+    for (const entityId of entityIds) {
+      const entity = entityId ? this.hass.states[entityId] : undefined;
+      if (entity)
+        return entity;
+    }
+
+    return undefined;
+  }
+
   private renderMopDrying(): Template {
-    const mopDryingEntity = this.hass.states[this.sensor.mopDrying];
+    // The mop drying binary sensor is deprecated and stops working in HA
+    // 2027.3.0. The switch that replaced it reports the same state, but it was
+    // created later, so its entity ID may carry a different prefix than the
+    // vacuum - hence the registry lookup before the ID-based defaults.
+    const mopDryingEntity = this.firstAvailable(
+      this.config.sensors?.mopDryingSwitch,
+      this.resolver.find('switch', 'mop_drying', true),
+      this.sensor.mopDryingSwitch,
+      this.sensor.mopDrying,
+    );
     if (!mopDryingEntity)
       return nothing;
 
@@ -435,7 +463,11 @@ export class RoborockVacuumCard extends LitElement {
     if (isDrying != 'on')
       return nothing;
 
-    const mopDryingTimeEntity = this.hass.states[this.sensor.mopDryingRemainingTime];
+    const mopDryingTimeEntity = this.firstAvailable(
+      this.config.sensors?.mopDryingRemainingTime,
+      this.sensor.mopDryingRemainingTime,
+      this.resolver.find('sensor', 'mop_drying_remaining_time', true),
+    );
     if (!mopDryingTimeEntity)
       return nothing;
 
@@ -446,7 +478,7 @@ export class RoborockVacuumCard extends LitElement {
     const timeInSeconds = unit === 'min' || unit === 'minutes' ? timeValue * 60 : timeValue;
 
     return html`
-      <div class="tip" @click="${() => this.handleMore(this.sensor.mopDryingRemainingTime)}">
+      <div class="tip" @click="${() => this.handleMore(mopDryingTimeEntity.entity_id)}">
         <ha-icon icon="mdi:heat-wave"></ha-icon>
         <span class="icon-title">${formatTime(timeInSeconds)}</span>
       </div>

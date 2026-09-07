@@ -37,6 +37,7 @@ entity: vacuum.robot
 #   battery: sensor.robot_bateria
 #   vacuumError: sensor.robot_blad_odkurzacza
 #   dockError: sensor.robot_dock_dock_error
+#   mopDryingSwitch: switch.robot_dock_mop_drying
 #   mopDrying: binary_sensor.robot_dock_mop_drying
 #   mopDryingRemainingTime: sensor.robot_dock_mop_drying_remaining_time
 #   cleaning: binary_sensor.robot_cleaning
@@ -127,7 +128,13 @@ areas:
   - Expected states: `none` = no error, other values = error description
 - `dockError` - Dock error sensor (default: `sensor.{robot_name}_dock_error`)
   - Expected states: `ok` = no error, other values = error description
-- `mopDrying` - Mop drying status sensor (default: `binary_sensor.{robot_name}_dock_mop_drying`)
+- `mopDryingSwitch` - Mop drying switch (default: `switch.{robot_name}_dock_mop_drying`), used first if it exists
+- `mopDrying` - Mop drying status sensor (default: `binary_sensor.{robot_name}_dock_mop_drying`), deprecated by the Roborock integration and removed in HA 2027.3.0; only used when no switch is found
+
+  The mop drying tile normally needs no configuration: the card looks the switch up in the entity
+  registry by its Roborock translation key, so it is found even when Home Assistant gave it an
+  entity ID that does not match the vacuum (which happens for the dock switches, because they were
+  added later than the rest of the device). Set `mopDryingSwitch` only to override that lookup.
 - `mopDryingRemainingTime` - Remaining mop drying time (default: `sensor.{robot_name}_dock_mop_drying_remaining_time`)
 - `cleaning` - Cleaning status sensor (default: `binary_sensor.{robot_name}_cleaning`)
 
