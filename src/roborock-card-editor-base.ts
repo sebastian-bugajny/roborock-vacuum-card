@@ -70,6 +70,10 @@ export abstract class RoborockCardEditorBase<C extends RoborockEditorConfig> ext
 
   protected robot: VacuumRobot = new VacuumRobot();
 
+  // The tab being edited is independent of the config: it must survive the
+  // setConfig() that Home Assistant fires back after every change.
+  private _editModeInitialized: boolean = false;
+
   static get styles(): CSSResultGroup {
     return css`
       .editor {
@@ -126,7 +130,12 @@ export abstract class RoborockCardEditorBase<C extends RoborockEditorConfig> ext
 
   protected setConfigInternal(config: C): void {
     this._config = { ...config };
-    this._editMode = config.default_mode ?? RoborockCleaningMode.VacAndMop;
+    // Only seed the edited tab the first time; later setConfig() calls come from
+    // our own edits and must not yank the user back to the default tab.
+    if (!this._editModeInitialized) {
+      this._editMode = config.default_mode ?? RoborockCleaningMode.VacAndMop;
+      this._editModeInitialized = true;
+    }
   }
 
   protected renderEntityPicker(): Template {
@@ -204,12 +213,24 @@ export abstract class RoborockCardEditorBase<C extends RoborockEditorConfig> ext
   }
 
   private renderRouteRow(): Template {
-    const buttons: SvgButton<string>[] = this.robot.getAvailableRouteModes()
+    const buttons: SvgButton<string>[] = this.orderedRouteModes()
       .filter(v => VacuumRobot.isSupportedRouteMode(v, this._editMode))
       .map(v => ({ icon: getRouteIcon(v, 24, this.iconColor()) as Template, value: v }));
 
     const active = this.effectiveValue('route');
     return this.renderRow('common.route_mode', `route_mode.${active}`, buttons, active, this.onRouteChange);
+  }
+
+  /** Same fixed order the popup uses, so the buttons never depend on device order. */
+  private orderedRouteModes(): RoborockRouteMode[] {
+    const available = this.robot.getAvailableRouteModes();
+    const preferredOrder = [
+      RoborockRouteMode.Fast,
+      RoborockRouteMode.Standard,
+      RoborockRouteMode.Deep,
+      RoborockRouteMode.DeepPlus,
+    ];
+    return preferredOrder.filter(mode => available.includes(mode));
   }
 
   private renderCycleRow(): Template {
