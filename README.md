@@ -92,6 +92,13 @@ Everything below is therefore optional - use it to override what discovery found
 
 ## `roborock-vacuum-card` options
 
+This card ships a **visual editor**: the card configuration dialog lets you pick the vacuum,
+toggle `show_roborock_icon` and `show_custom_cleaning_inline`, and set the default tab and the
+per-tab defaults (suction / mop intensity / route / cleaning count) by clicking - offering only
+the levels your vacuum reports. The remaining options (`stats`, `sensors`, `areas`, the entity
+overrides) stay in YAML. Everything the editor writes is the YAML documented here, so the two
+stay interchangeable.
+
 | Option | Type | Default | Description |
 | --- | --- | --- | --- |
 | `entity` | string | **required** | The vacuum entity, e.g. `vacuum.saros_10r` |

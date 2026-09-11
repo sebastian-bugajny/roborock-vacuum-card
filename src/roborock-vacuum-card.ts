@@ -25,10 +25,12 @@ import { formatTime, formatTimeAsMinutesSeconds, formatMinutesAsMinutesSeconds }
 import { getSuctionIcon, getMoppingIcon as getMopIcon, getRouteIcon } from './resorces'
 import { CustomCleaningPopup } from './custom-cleaning-popup'
 import { RoborockCleaningCard } from './roborock-cleaning-card'
+import { RoborockVacuumCardEditor } from './roborock-vacuum-card-editor'
 import { ROBOROCK_ICON_BASE64 } from './roborock-icon'
 
 typeof (CustomCleaningPopup);
 typeof (RoborockCleaningCard);
+typeof (RoborockVacuumCardEditor);
 
 const PKG_VERSION = 'PKG_VERSION_VALUE';
 
@@ -610,6 +612,11 @@ export class RoborockVacuumCard extends LitElement {
 
   private state(id: string): string | undefined {
     return this.hass.states[id]?.state;
+  }
+
+  /** Provide the visual editor shown in the card configuration dialog. */
+  static getConfigElement(): HTMLElement {
+    return document.createElement('roborock-vacuum-card-editor');
   }
 
   /** Called by the card picker - offer a vacuum that actually exists. */

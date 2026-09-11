@@ -116,6 +116,8 @@
   "editor": {
     "pick_entity_first": "Select a vacuum to configure its cleaning defaults.",
     "default_open_tab": "Default open tab",
-    "defaults_for_tab": "Defaults for tab"
+    "defaults_for_tab": "Defaults for tab",
+    "show_roborock_icon": "Show the vacuum image",
+    "show_inline_panel": "Keep the cleaning panel always visible (no popup)"
   }
 }

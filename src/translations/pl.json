@@ -116,6 +116,8 @@
   "editor": {
     "pick_entity_first": "Wybierz odkurzacz, aby ustawić domyślne parametry sprzątania.",
     "default_open_tab": "Domyślnie otwierana zakładka",
-    "defaults_for_tab": "Domyślne parametry dla zakładki"
+    "defaults_for_tab": "Domyślne parametry dla zakładki",
+    "show_roborock_icon": "Pokaż obrazek odkurzacza",
+    "show_inline_panel": "Panel sprzątania zawsze widoczny (bez popupu)"
   }
 }
