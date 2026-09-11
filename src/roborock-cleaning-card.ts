@@ -7,9 +7,12 @@ import localize from './localize';
 import { CustomCleaningPopup } from './custom-cleaning-popup';
 import { RoborockRoomSource } from './room-source';
 import { MyHomeAssistant, RoborockArea } from './types';
+import { RoborockCleaningCardEditor } from './roborock-cleaning-card-editor';
 
 // Register custom cleaning popup
 typeof CustomCleaningPopup;
+// Register the visual config editor
+typeof RoborockCleaningCardEditor;
 
 @customElement('roborock-cleaning-card')
 export class RoborockCleaningCard extends LitElement {
@@ -150,6 +153,11 @@ export class RoborockCleaningCard extends LitElement {
 
   getCardSize(): number {
     return 3;
+  }
+
+  /** Provide the visual editor shown in the card configuration dialog. */
+  static getConfigElement(): HTMLElement {
+    return document.createElement('roborock-cleaning-card-editor');
   }
 
   /** Called by the card picker - offer a vacuum that actually exists. */

@@ -111,14 +111,18 @@ export interface RoborockCleaningParameters {
   suction?: RoborockSuctionMode
   mop?: RoborockMopMode
   route?: RoborockRouteMode
+  /** Cleaning counter (x1 / x2). Accepts a number or its string form from YAML. */
+  cycle?: number | string
 }
+
+export type RoborockDefaultModes = Partial<Record<RoborockCleaningMode, RoborockCleaningParameters>>;
 
 export interface RoborockVacuumCardConfig {
   entity: string;
   stats: Record<string, VacuumCardStat[]>;
   areas?: VacuumArea[];
   default_mode?: RoborockCleaningMode;
-  default_modes?: Record<RoborockCleaningMode, RoborockCleaningParameters>;
+  default_modes?: RoborockDefaultModes;
   mop_intensity_entity?: string;
   mop_mode_entity?: string;
   show_custom_cleaning_inline?: boolean;
@@ -130,7 +134,7 @@ export interface RoborockCleaningCardConfig {
   entity: string;
   areas?: VacuumArea[];
   default_mode?: RoborockCleaningMode;
-  default_modes?: Record<RoborockCleaningMode, RoborockCleaningParameters>;
+  default_modes?: RoborockDefaultModes;
   mop_intensity_entity?: string;
   mop_mode_entity?: string;
 }

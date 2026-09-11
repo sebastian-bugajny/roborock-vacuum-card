@@ -103,12 +103,18 @@ Everything below is therefore optional - use it to override what discovery found
 | `mop_intensity_entity` | string | discovered | The mop intensity `select` entity |
 | `mop_mode_entity` | string | discovered | The route `select` entity (the integration calls it "mop mode") |
 | `default_mode` | string | `vac&mop` | Cleaning mode preselected when the panel opens: `vac&mop`, `mop` or `vac` |
-| `default_modes` | object | app defaults | Preselected suction / mop / route per cleaning mode |
+| `default_modes` | object | app defaults | Preselected suction / mop / route / cycle per cleaning mode |
 
 ## `roborock-cleaning-card` options
 
 `entity`, `areas`, `mop_intensity_entity`, `mop_mode_entity`, `default_mode` and
 `default_modes` behave exactly as above.
+
+This card ships a **visual editor**: in the card configuration dialog you pick the vacuum, the
+tab that opens by default, and - per tab (`vac&mop` / `mop` / `vac`) - the default suction, mop
+intensity, route and cleaning count. Only the levels your vacuum actually reports are offered,
+so you never have to look up option names. Everything it writes is the same `default_mode` /
+`default_modes` YAML documented below, so you can still edit it by hand.
 
 The remaining options do not apply: this card *is* the cleaning panel, so it is always inline
 and shows no status, stats or sensor tiles - and therefore takes no `sensors`,
@@ -140,6 +146,7 @@ default_modes:
   mop:
     mop: high
     route: deep
+    cycle: 1
   vac:
     suction: max_plus
   vac&mop:
@@ -147,7 +154,7 @@ default_modes:
 ```
 
 Accepted values: `suction` - `quiet`, `balanced`, `turbo`, `max`, `max_plus`; `mop` - `low`,
-`medium`, `high`; `route` - `fast`, `standard`, `deep`, `deep_plus`.
+`medium`, `high`; `route` - `fast`, `standard`, `deep`, `deep_plus`; `cycle` - `1` or `2`.
 
 ## Rooms
 

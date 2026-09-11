@@ -112,5 +112,10 @@
     "side_brush": "Szczotka boczna",
     "main_brush": "Szczotka główna",
     "sensors": "Sensory"
+  },
+  "editor": {
+    "pick_entity_first": "Wybierz odkurzacz, aby ustawić domyślne parametry sprzątania.",
+    "default_open_tab": "Domyślnie otwierana zakładka",
+    "defaults_for_tab": "Domyślne parametry dla zakładki"
   }
 }

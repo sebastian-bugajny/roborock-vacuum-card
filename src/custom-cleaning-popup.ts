@@ -454,6 +454,13 @@ export class CustomCleaningPopup extends LitElement {
         RoborockRouteMode.DeepPlus,
       ]);
     }
+
+    this.activeCycleMode = this.normalizeCycle(configured.cycle);
+  }
+
+  /** The cleaning counter only offers x1 / x2; anything else falls back to x1. */
+  private normalizeCycle(cycle: number | string | undefined): string {
+    return `${cycle}` === '2' ? '2' : '1';
   }
 
   private pickSupportedSuctionMode(preferredModes: (RoborockSuctionMode | undefined)[]): RoborockSuctionMode {

@@ -112,5 +112,10 @@
     "side_brush": "Side brush",
     "main_brush": "Main brush",
     "sensors": "Sensors"
+  },
+  "editor": {
+    "pick_entity_first": "Select a vacuum to configure its cleaning defaults.",
+    "default_open_tab": "Default open tab",
+    "defaults_for_tab": "Defaults for tab"
   }
 }
